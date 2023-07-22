@@ -19,7 +19,7 @@ class Layer {
 	virtual ~Layer() {
 		std::cout << "Layer destructor" << std::endl;
 	}
-	virtual void propagateForward(std::vector<Matrix> &input) = 0;
-	virtual void propagateBackward(std::vector<Matrix> &output) = 0;
+	virtual void propagateForward(std::vector<Matrix*> &input) = 0;
+	virtual void propagateBackward(std::vector<Matrix*> &output) = 0;
 };
 #endif

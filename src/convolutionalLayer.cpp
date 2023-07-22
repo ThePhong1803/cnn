@@ -118,42 +118,80 @@ Matrix conv(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding){
 
 
 ConvolutionalLayer::ConvolutionalLayer(LayerConfig * _config) : Layer(), config(_config) {
-	/* Implement ConvolutionalLayer constructor 
-		The toplogoy input should be: {h, w, d, m, n, p, k}
-		- h, w, d is the input image height, width, depth respectively
-		- m, n, p is the size of kernel height, width, depth respectively
-	    - k is the number of kernel in this layer
-	*/
-	// extract layer configuration
-	// int h 			= this -> config -> imageHeight;		// input image height
-	// int w 			= this -> config -> imageWidth;			// input image width
-	// int d 			= this -> config -> imageDepth;			// input image depth
-	// int m 			= this -> config -> kernelHeight;		// kernel height
-	// int n 			= this -> config -> kernelWidth;		// kernel width
-	// int p 			= this -> config -> kernelDepth;		// kernel depth
-	// int k 			= this -> config -> numKernel;			// number of filter kernel
-	// int padding		= this -> config -> padding;			// padding adding to input image
-	// int striding 	= this -> config -> striding;			// striding for correleation operation
+	/* Implement ConvolutionalLayer constructor */
 	
-	// // calculate output matrix size
-	// int R = (h - m) / striding + 1;
-	// int C = (w - n) / striding + 1;
+	// calculate output matrix size from config
+	int R = (config -> imageHeight + 2 * config -> padding - config -> kernelHeight) / config -> striding + 1;
+	int C = (config -> imageWidth  + 2 * config -> padding - config -> kernelWidth ) / config -> striding + 1;
 	
-	// // create container for output, and bias matrix
-	// for(int i = 0; i < k; i++){
-		// output.push_back(new Matrix(R, C));
-		// bias.push_back(new Matrix(R, C));
-	// }
-	std::cout << "ConvolutionalLayer constructor" << std::endl;
+	// create container for kernel matrix
+	for(int i = 0; i < config -> numKernel; i++){
+		// adding kernel layer container
+		kernel.push_back(std::vector<Matrix*>());
+		for(int j = 0; j < config -> imageDepth; j++){
+			// add new kernel matrix layer to current kernel
+			kernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
+			// init kernel with random value
+			kernel.back().back() -> setRandom();
+		}
+	}
+	
+	// create container for output, and bias matrix
+	for(int i = 0; i < config -> numKernel; i++){
+		// output, caches and biases with k layers
+		output.push_back(new Matrix(R, C));
+		caches.push_back(new Matrix(R, C));
+		biases.push_back(new Matrix(R, C));
+		
+		// init output and bias with zero and random (zero for now)
+		output.back() -> setZero();
+		caches.back() -> setZero();
+		biases.back() -> setZero();
+	}
 }
 
 ConvolutionalLayer::~ConvolutionalLayer(){
 	/* Implement ConvolutionalLayer destructor */
-	std::cout << "ConvolutionalLayer destructor" << std::endl;
+	// deallocate used mem in k kernel
+	for(size_t i = 0; i < kernel.size(); i++){
+		// deallocate used mem for kernel
+		for(size_t j = 0; j < kernel[i].size(); j++){
+			// delete kernel layer mem
+			delete kernel.back().back();
+			// delete entry in kernel layers vector
+			kernel.back().pop_back();
+		}
+		// delete kernel entry in kernel vector
+		kernel.pop_back();
+		
+		// delete output, caches and biases mem
+		delete output.back();
+		delete caches.back();
+		delete biases.back();
+		
+		// delete entry in output, caches and biases vectors
+		output.pop_back();
+		caches.pop_back();
+		biases.pop_back();
+	}
 }
 
 // this function perform network forward propagation
-void ConvolutionalLayer::propagateForward(std::vector<Matrix> &input) {}
+void ConvolutionalLayer::propagateForward(std::vector<Matrix*> &input) {
+	// for each filter kernel in kernel vector
+	for(size_t i = 0; i < kernel.size(); i++){
+		// calculate correlation in each layer and add to caches layer
+		// clean caches before calculation
+		caches[i] -> setZero();
+		for(size_t l = 0; l < kernel[i].size(); l++){
+			(*caches[i]) += corr(*input[l], *kernel[i][l], config -> padding, config -> striding);
+		}
+		// adding biases to caches layer
+		(*caches[i]) += (*biases[i]);
+		// apply activation function in each output
+		(*output[i]) = caches[i] -> unaryExpr(std::ptr_fun(config -> actFun));
+	}
+}
 
-// thsi frunction perform network backward propagateion
-void ConvolutionalLayer::propagateBackward(std::vector<Matrix> &output) {}
+// this frunction perform network backward propagateion
+void ConvolutionalLayer::propagateBackward(std::vector<Matrix*> &output) {}
