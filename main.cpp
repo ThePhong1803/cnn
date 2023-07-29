@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
 	config_0.numKernel    = 4;		// hyperparameter
 	config_0.padding      = 0;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
-	config_0.actFun		  = tanhAct;
-	config_0.dactFun	  = dtanhAct;
+	config_0.actFun		  = ReLU;
+	config_0.dactFun	  = dReLU;
 	config_0.learningRate = 0.01;
 
 	ConvConfig config_1;
@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
 	config_1.numKernel    	= 2;		// hyperparameter
 	config_1.padding      	= 0;		// hyperparameter, usually zero
 	config_1.striding     	= 1;		// hyperparameter ??? (unsure, use default)
-	config_1.actFun			= tanhAct;
-	config_1.dactFun		= dtanhAct;
+	config_1.actFun			= Sigmoid;
+	config_1.dactFun		= dSigmoid;
 	config_1.learningRate 	= 0.01;
 
 	PoolingConfig config_2;

@@ -214,7 +214,6 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 		caches.back() -> setZero();
 		biases.back() -> setZero();
 	}
-	std::cout << "conv constr" << std::endl;
 }
 
 ConvolutionalLayer::~ConvolutionalLayer(){
