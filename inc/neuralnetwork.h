@@ -1,11 +1,7 @@
 #ifndef __NEURAL_NETWORK_H__
 #define __NEURAL_NETWORK_H__
 
-#include <eigen3/Eigen/Eigen>
-#include <iostream>
-#include <vector>
-#include <iomanip>
-#include <fstream>
+#include <common.h>
 #pragma once
 
 // use typedefs for future ease for changing data types like : float to double
@@ -21,6 +17,10 @@ Scalar Sigmoid(Scalar x);
 Scalar dSigmoid(Scalar x);
 Scalar ReLU(Scalar x);
 Scalar dReLU(Scalar x);
+Scalar LeakyReLU(Scalar x);
+Scalar dLeakyReLU(Scalar x);
+Scalar tanhAct(Scalar x);
+Scalar dtanhAct(Scalar x);
 
 // neural network implementation class!
 class NeuralNetwork {

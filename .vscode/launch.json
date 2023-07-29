@@ -36,9 +36,9 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/out.exe",
+            "program": "${workspaceFolder}/bin/out.exe",
             "args": [
-                "1", "1", "1"
+                "1"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

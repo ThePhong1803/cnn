@@ -1,4 +1,6 @@
-#include <convolutionalLayer.h>
+#include <convolutionallayer.h>
+
+// Correlation and Convolution operation implementation
 
 Matrix corr(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding) {
 	/* 
@@ -38,13 +40,15 @@ Matrix corr(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding) {
 		int our case, the formula would be:	[(w - k)/s] + 1, with:
 			w: temp input matrix size (w x w) or (n + 2p) x (n + 2p)
 	*/
-	int resRows = (input.rows() - kernel.rows()) / striding + 1;
-	int resCols = (input.cols() - kernel.cols()) / striding + 1;
+	uint32_t resRows = (input.rows() - kernel.rows()) / striding + 1;
+	uint32_t resCols = (input.cols() - kernel.cols()) / striding + 1;
 	Matrix res(resRows, resCols);
 	
 	// loop throught each element of the output matrix and calculate base on the input matrix and input kernel matrix
-	for(int i = 0; i < res.rows(); i++){
-		for(int j= 0; j < res.cols(); j++) {
+	for(uint32_t i = 0; i < res.rows(); i++)
+	{
+		for(uint32_t j= 0; j < res.cols(); j++) 
+		{
 			/*
 				Start from the first row, col of input matrix, each time take out 1 block which size is 
 				equal to kernel matrix, for sitriding, we decrease striding value by 1 because when calculate 
@@ -97,13 +101,15 @@ Matrix conv(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding){
 		int our case, the formula would be:	[(w - k)/s] + 1, with:
 			w: temp input matrix size (w x w) or (n + 2p) x (n + 2p)
 	*/
-	int resRows = (input.rows() - rot180Kernel.rows()) / striding + 1;
-	int resCols = (input.cols() - rot180Kernel.cols()) / striding + 1;
+	uint32_t resRows = (input.rows() - rot180Kernel.rows()) / striding + 1;
+	uint32_t resCols = (input.cols() - rot180Kernel.cols()) / striding + 1;
 	Matrix res(resRows, resCols);
 	
 	// loop throught each element of the output matrix and calculate base on the input matrix and input kernel matrix
-	for(int i = 0; i < res.rows(); i++){
-		for(int j= 0; j < res.cols(); j++) {
+	for(uint32_t i = 0; i < res.rows(); i++)
+	{
+		for(uint32_t j= 0; j < res.cols(); j++) 
+		{
 			/*
 				Start from the first row, col of input matrix, each time take out 1 block which size is 
 				equal to kernel matrix, for sitriding, we decrease striding value by 1 because when calculate 
@@ -117,27 +123,87 @@ Matrix conv(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding){
 }
 
 
-ConvolutionalLayer::ConvolutionalLayer(LayerConfig * _config) : Layer(), config(_config) {
+// ConvolutionalLayer config classs implementation
+ConvConfig::ConvConfig() : LayerConfig()
+{
+	// do nothing
+}
+
+ConvConfig::~ConvConfig()
+{
+	// do nothing
+}
+
+uint32_t &ConvConfig::inputHeightRef()
+{
+	return this -> inputHeight;
+}
+
+uint32_t &ConvConfig::inputWidthRef()
+{
+	return this -> inputWidth;
+}
+
+uint32_t &ConvConfig::inputDepthRef()
+{
+	return this -> inputDepth;
+}
+
+uint32_t &ConvConfig::kernelHeightRef()
+{
+	return this -> kernelHeight;
+}
+
+uint32_t &ConvConfig::kernelWidthRef()
+{
+	return this -> kernelWidth;
+}
+
+uint32_t &ConvConfig::kernelDepthRef()
+{
+	// kernel depth is equal to current layer input depth
+	return this -> inputDepth;
+}
+
+ScalarFunPtr &ConvConfig::activationFunctionRef()
+{
+	return this -> actFun;
+}
+ScalarFunPtr &ConvConfig::activationFunctionDerivativeRef()
+{
+	return this -> dactFun;
+}
+
+// ConvolutionalLayer implementation
+ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_config) 
+{
+	// check condition for layer initialization
 	/* Implement ConvolutionalLayer constructor */
-	
+	// check if config is valid (output is cover all input)
+	assert((config -> inputHeight + 2 * config -> padding - config -> kernelHeight + 1) % config -> striding == 0);
+	assert((config -> inputWidth  + 2 * config -> padding - config -> kernelWidth  + 1) % config -> striding == 0);
+
 	// calculate output matrix size from config
-	int R = (config -> imageHeight + 2 * config -> padding - config -> kernelHeight) / config -> striding + 1;
-	int C = (config -> imageWidth  + 2 * config -> padding - config -> kernelWidth ) / config -> striding + 1;
-	
+	uint32_t R = (config -> inputHeight + 2 * config -> padding - config -> kernelHeight) / config -> striding + 1;
+	uint32_t C = (config -> inputWidth  + 2 * config -> padding - config -> kernelWidth ) / config -> striding + 1;
+
 	// create container for kernel matrix
-	for(int i = 0; i < config -> numKernel; i++){
+	for(uint32_t i = 0; i < config -> numKernel; i++)
+	{
 		// adding kernel layer container
 		kernel.push_back(std::vector<Matrix*>());
-		for(int j = 0; j < config -> imageDepth; j++){
+		for(uint32_t j = 0; j < config -> inputDepth; j++)
+		{
 			// add new kernel matrix layer to current kernel
 			kernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
 			// init kernel with random value
 			kernel.back().back() -> setRandom();
 		}
 	}
-	
+
 	// create container for output, and bias matrix
-	for(int i = 0; i < config -> numKernel; i++){
+	for(uint32_t i = 0; i < config -> numKernel; i++)
+	{
 		// output, caches and biases with k layers
 		output.push_back(new Matrix(R, C));
 		caches.push_back(new Matrix(R, C));
@@ -148,14 +214,17 @@ ConvolutionalLayer::ConvolutionalLayer(LayerConfig * _config) : Layer(), config(
 		caches.back() -> setZero();
 		biases.back() -> setZero();
 	}
+	std::cout << "conv constr" << std::endl;
 }
 
 ConvolutionalLayer::~ConvolutionalLayer(){
 	/* Implement ConvolutionalLayer destructor */
-	// deallocate used mem in k kernel
-	for(size_t i = 0; i < kernel.size(); i++){
+	// deallocate used mem in k kernel, k output layer and k biases
+	while(kernel.size() != 0)
+	{
 		// deallocate used mem for kernel
-		for(size_t j = 0; j < kernel[i].size(); j++){
+		while(kernel.back().size() != 0)
+		{
 			// delete kernel layer mem
 			delete kernel.back().back();
 			// delete entry in kernel layers vector
@@ -176,15 +245,29 @@ ConvolutionalLayer::~ConvolutionalLayer(){
 	}
 }
 
+// function to access this layer input and output
+std::vector<Matrix *> &ConvolutionalLayer::inputRef()
+{
+	return this -> input;
+} 
+
+std::vector<Matrix *> &ConvolutionalLayer::outputRef()
+{
+	return this -> output;
+} 
+
+
 // this function perform network forward propagation
-void ConvolutionalLayer::propagateForward(std::vector<Matrix*> &input) {
+void ConvolutionalLayer::propagateForward(std::vector<Matrix *> * input) {
 	// for each filter kernel in kernel vector
-	for(size_t i = 0; i < kernel.size(); i++){
+	for(size_t i = 0; i < kernel.size(); i++)
+	{
 		// calculate correlation in each layer and add to caches layer
 		// clean caches before calculation
 		caches[i] -> setZero();
-		for(size_t l = 0; l < kernel[i].size(); l++){
-			(*caches[i]) += corr(*input[l], *kernel[i][l], config -> padding, config -> striding);
+		for(size_t l = 0; l < kernel[i].size(); l++)
+		{
+			(*caches[i]) += corr(*(*input)[l], *kernel[i][l], config -> padding, config -> striding);
 		}
 		// adding biases to caches layer
 		(*caches[i]) += (*biases[i]);
@@ -194,4 +277,43 @@ void ConvolutionalLayer::propagateForward(std::vector<Matrix*> &input) {
 }
 
 // this frunction perform network backward propagateion
-void ConvolutionalLayer::propagateBackward(std::vector<Matrix*> &output) {}
+void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
+{
+	// calculate layer error 
+	std::vector<Matrix> delta(output.size());
+	for(size_t i = 0; i < delta.size(); i++)
+	{
+		// loop throught all errors layer calculate layer errors
+		Matrix d = ((*errors)[i] -> array()) * (caches[i] -> unaryExpr(std::ptr_fun(config -> dactFun)).array());
+		// Matrix d = *(*errors)[i];
+		delta[i] = d;	
+	}
+
+	// delete current error vector
+	while(errors -> size() != 0)
+	{
+		// delete all errors layer util the errors vector is empty
+		delete errors -> back();
+		errors -> pop_back();
+	}
+
+	// resize error vecotr and errors layer matrix for previous layer
+
+	// loop through each layer in input layer
+	for(size_t l = 0; l < config -> inputDepth; l++)
+	{
+		// create error matrix for prev layer init with zeros
+		errors -> push_back(new Matrix(config -> inputHeight, config -> inputWidth));
+		errors -> back() -> setZero();
+		// loop through all kernel in our kernel vector
+		for(size_t k = 0; k < kernel.size(); k++)
+		{
+			// update kernel layer l with the calculated error
+			(*kernel[k][l]) += config -> learningRate * corr(*input[l], delta[k]);
+			// update errors vector for next layer
+			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - 1, 1);
+			// update biases matrix
+			(*biases[k]) += config -> learningRate * (delta[k]);
+		}
+	}
+}

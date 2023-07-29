@@ -1,30 +1,4 @@
 #include <neuralnetwork.h>
-
-// activation function 
-Scalar Sigmoid(Scalar x)
-{
-	// sigmoid
-	return 1.0f/(1 + exp(-x));
-}
-
-Scalar ReLU(Scalar x)
-{
-	// ReLU
-	return (x > 0) ?  x : 0;
-}
-
-Scalar dSigmoid(Scalar x)
-{
-	// sigmiod derivative
-	return Sigmoid(x) * (1 - Sigmoid(x));
-}
-
-Scalar dReLU(Scalar x)
-{
-	// ReLU derivative
-	return (x > 0) ?  1 : 0;
-}
-
 // constructor of neural network class
 /*
 	@param topology: stl vector input for network topology
@@ -52,7 +26,7 @@ NeuralNetwork::NeuralNetwork(std::vector<uint> topology, std::vector<std::pair<S
 			
 			// initialization
 			this -> cachesLayers.back() -> setZero();
-			this -> bias.back()			-> setRandom();
+			this -> bias.back()			-> setZero();
 			this -> weights.back() 		-> setRandom();
 			this -> dbias.back()		-> setZero();
 			this -> dweights.back()		-> setZero();
@@ -115,23 +89,22 @@ void NeuralNetwork::propagateBackward(RowVector& output)
 		*/
 	RowVector errors = (output - (*neuronLayers[neuronLayers.size() - 1]));
 	for (int i = weights.size() - 1; i >= 0; i--) {
-		// iterate throught each error vector and calculate error, and update weights and biases
-		RowVector prevErrors = errors * weights[i] -> transpose();
-
-		Matrix gradients = (errors.array() * (cachesLayers[i] -> unaryExpr(std::ptr_fun(actFunPtr[i].second))).array());
-
-		(*dbias[i]) 	+= gradients;
-		(*dweights[i]) 	+= (neuronLayers[i] -> transpose()) * gradients;
-		errors = prevErrors;
+		// calculate delta of current layer
+		Matrix delta = (errors.array() * (cachesLayers[i] -> unaryExpr(std::ptr_fun(actFunPtr[i].second))).array());
+		// we need to error for prev layer before update weight and bias
+		errors = errors * weights[i] -> transpose();		// Cross entropy optimization
+		(*dbias[i]) 	+= delta;
+		(*dweights[i]) 	+= (neuronLayers[i] -> transpose() * delta);
+		// we need to pass error value back to prev layer
     }
 }
 
 void NeuralNetwork::updateWeightsAndBias(int batchSize) {
 	// update weight and bias
 	for(uint i = 0; i < weights.size(); i++){
-		// apply learning rate to sum of changes in weight and biases
-		(*dbias[i]) 	*= this -> learningRate;
+		// apply learning rate
 		(*dweights[i]) 	*= this -> learningRate;
+		(*dbias[i])	  	*= this -> learningRate;
 
 		// update the network weights and biases
 		(*weights[i]) 	+= ((*dweights[i]) / float(batchSize));  // add the average change in weight
@@ -161,7 +134,7 @@ std::pair<float, float> NeuralNetwork::train(std::vector<RowVector*> input_data,
         // std::cout << "MSE : " << std::sqrt((*neuronLayers.back() - *output_data[index]).dot((*neuronLayers.back() - *output_data[index])) / neuronLayers.back()->size()) << std::endl;
 		// std::cout << "___________________________________________" << std::endl;
 		// this -> printNetwork();
-		MSE += std::sqrt((*neuronLayers.back() - *output_data[index]).dot((*neuronLayers.back() - *output_data[index])) / neuronLayers.back()->size());
+		MSE += 0.5f * (*neuronLayers.back() - *output_data[index]).dot((*neuronLayers.back() - *output_data[index]));
 		int output_num = outputToLabelIdx(neuronLayers.back());
 		int expected_num = outputToLabelIdx(output_data[index]);
 		if(output_num == expected_num) ACC++;
@@ -226,7 +199,7 @@ std::pair<float, float> NeuralNetwork::validateTrain(std::vector<RowVector*> inp
 		int output_num = outputToLabelIdx(neuronLayers.back());
 		int expected_num = outputToLabelIdx(output_data[index]);
 		//float confidence = neuronLayers.back() -> coeff(output_num);
-		MSE += std::sqrt((*neuronLayers.back() - *output_data[index]).dot((*neuronLayers.back() - *output_data[index])) / neuronLayers.back()->size());
+		MSE += 0.5f * (*neuronLayers.back() - *output_data[index]).dot((*neuronLayers.back() - *output_data[index]));
 		// update accuracy and confident level
 		if(output_num == expected_num) {
 			ACC++;
