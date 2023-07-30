@@ -56,6 +56,7 @@ std::vector<Matrix *> &FlattenLayer::outputRef()
 void FlattenLayer::propagateForward(std::vector<Matrix *> * input)
 {
     // loop throught all feature map in input matrix vector
+    output.back() -> resize(config->inputHeight, config->inputWidth * config->inputDepth);
     for(size_t i = 0; i < config -> inputDepth; i++)
     {
         output.back() -> block(0, i * config -> inputWidth, config -> inputHeight, config -> inputWidth) = *(*input)[i];
@@ -70,7 +71,6 @@ void FlattenLayer::propagateBackward(std::vector<Matrix *> * errors)
 {
     // resize error matrix and output back
     errors -> back() -> resize(config -> inputHeight,  config -> inputWidth * config -> inputDepth);
-    output.back() -> resize(config->inputHeight, config->inputWidth * config->inputDepth);
 
     std::vector<Matrix *> temp;
     for(size_t i = 0; i < config -> inputDepth; i++)

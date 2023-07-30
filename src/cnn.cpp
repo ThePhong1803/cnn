@@ -15,6 +15,9 @@ ConvolutionalNeuralNetwork::ConvolutionalNeuralNetwork(std::vector<LayerConfig *
 		else if (config[i] -> layerType == "flatten") {
 			this -> layer.push_back(new FlattenLayer((FlattenConfig*)config[i]));
 		}
+		else if (config[i] -> layerType == "dense") {
+			this -> layer.push_back(new DenseLayer((DenseConfig*)config[i]));
+		}
 		else {
 			// clean object instance before exit
 			this -> deleteNetwork();
@@ -86,4 +89,40 @@ void ConvolutionalNeuralNetwork::propagateBackward(std::vector<Matrix*> expected
 		delete errors.back();
 		errors.pop_back();
 	}
+}
+
+// training and validate implementation
+Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> input,
+										 std::vector<std::vector<Matrix *>> output,
+										 int batchSize)
+{
+	// loop through all element in batches and train the network, after that we calculate the error
+	Scalar MSE = 0;
+	for(int n = 0; n < batchSize; n++)
+	{
+		this -> propagateForward(input[n]);
+		this -> propagateBackward(output[n]);
+		// calculate mean square errors
+		MSE += 0.5 *(RowVector(*output[n].back()) - RowVector(*layer.back() -> outputRef().back())).dot(RowVector(*output[n].back()) - RowVector(*layer.back() -> outputRef().back()));
+		std::cout << "\rTrain process: " << float(n + 1) / batchSize;
+	}
+	return MSE / batchSize;
+}
+
+Scalar ConvolutionalNeuralNetwork::validate(std::vector<std::vector<Matrix *>> input,
+											std::vector<std::vector<Matrix *>> output,
+											int (*outputToLabelIdx)(Matrix *), 
+											int batchSize)
+{
+	Scalar ACC = 0;
+	for(int n = 0; n < batchSize; n++)
+	{
+		this -> propagateForward(input[n]);
+		// calculate mean square errors
+		int output_num   = outputToLabelIdx(layer.back() -> outputRef().back());
+		int expected_num = outputToLabelIdx(output[n].back());
+		if(output_num == expected_num) ACC++;
+		std::cout << "\rValidate process: " << float(n + 1) / batchSize;
+	}
+	return ACC / batchSize;
 }

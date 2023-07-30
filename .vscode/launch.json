@@ -38,7 +38,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/out.exe",
             "args": [
-                "1"
+                "1", "1", "1"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
@@ -58,7 +58,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "Compile"
+            // "preLaunchTask": "Compile"
         }
 
     ]

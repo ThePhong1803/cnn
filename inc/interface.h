@@ -33,6 +33,10 @@ class LayerConfig {
 	virtual uint32_t &kernelWidthRef();
 	virtual uint32_t &kernelDepthRef();
 	
+	virtual uint32_t &outputHeightRef();
+	virtual uint32_t &outputWidthRef();
+	virtual uint32_t &outputDepthRef();
+
 	virtual ScalarFunPtr &activationFunctionRef();
 	virtual ScalarFunPtr &activationFunctionDerivativeRef();
 	// element access in derive class

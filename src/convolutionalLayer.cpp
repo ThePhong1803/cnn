@@ -308,9 +308,9 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 		for(size_t k = 0; k < kernel.size(); k++)
 		{
 			// update kernel layer l with the calculated error
-			(*kernel[k][l]) += config -> learningRate * corr(*input[l], delta[k]);
+			(*kernel[k][l]) += config -> learningRate * corr(*input[l], delta[k], config -> padding, config -> striding);
 			// update errors vector for next layer
-			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - 1, 1);
+			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - config -> padding - 1, 1);
 			// update biases matrix
 			(*biases[k]) += config -> learningRate * (delta[k]);
 		}

@@ -40,6 +40,21 @@ uint32_t &LayerConfig::inputDepthRef()
 	throw DisableMethod("inputDepthRef");
 }
 
+uint32_t &LayerConfig::outputHeightRef()
+{
+	throw DisableMethod("inputHeightRef");
+}
+
+uint32_t &LayerConfig::outputWidthRef()
+{
+	throw DisableMethod("inputWidthRef");
+}
+
+uint32_t &LayerConfig::outputDepthRef()
+{
+	throw DisableMethod("inputDepthRef");
+}
+
 uint32_t &LayerConfig::kernelHeightRef()
 {
 	throw DisableMethod("kernelHeightRef");
