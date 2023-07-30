@@ -9,10 +9,11 @@ BUILD_PATH = build
 # Bin path
 BIN_PATH = bin
 # compiler flags
-CFLAGS = -g -Wall -Wunknown-pragmas
+CFLAGS = -g -Wall -Wunknown-pragmas  -march=native -O3
 # -g			   : this flag adds debugging info to the executable file
 # -Wall 		   : this flag is used to turn on most compiler warnings
-#-Wunknown-pragmas : this flag is used to tell compiler to ignore unkown pragma
+#-Wunknown-pragmas 	   : this flag is used to tell compiler to ignore unkown pragma
+# -march=native -O3        : this flag is used for optimization
 
 SRC   := $(wildcard */*.cpp) $(wildcard *.cpp)
 OBJ   := $(SRC:.cpp=.o)

@@ -160,47 +160,47 @@ int main(int argc, char ** argv)
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
 	config_0.actFun		  = ReLU;
 	config_0.dactFun	  = dReLU;
-	config_0.learningRate = 0.001;
+	config_0.learningRate = 0.01;
 
 	PoolingConfig config_1;
 	config_1.layerType		= "maxpool";
 	config_1.inputHeight  	= 28;	
 	config_1.inputWidth   	= 28;	
 	config_1.inputDepth   	= 32;	// depend on previous hyperparameter
-	config_1.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
-	config_1.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
+	config_1.kernelHeight 	= 4;	// hyperparameter, must be divisible by input widen
+	config_1.kernelWidth  	= 4;	// hyperparameter, must be divisible by input width
 
-	ConvConfig config_2;
-	config_2.layerType		= "conv";
-	config_2.inputHeight  	= 14;	 
-	config_2.inputWidth   	= 14;	
-	config_2.inputDepth   	= 32;		// depend on previous hyperparameter
-	config_2.kernelHeight 	= 3;	// hyperparameter
-	config_2.kernelWidth  	= 3;	// hyperparameter
-	config_2.numKernel    	= 64;		// hyperparameter
-	config_2.padding      	= 1;		// hyperparameter, usually zero
-	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
-	config_2.actFun			= ReLU;
-	config_2.dactFun		= dReLU;
-	config_2.learningRate 	= 0.001;
+	// ConvConfig config_2;
+	// config_2.layerType		= "conv";
+	// config_2.inputHeight  	= 14;	 
+	// config_2.inputWidth   	= 14;	
+	// config_2.inputDepth   	= 32;		// depend on previous hyperparameter
+	// config_2.kernelHeight 	= 3;	// hyperparameter
+	// config_2.kernelWidth  	= 3;	// hyperparameter
+	// config_2.numKernel    	= 64;		// hyperparameter
+	// config_2.padding      	= 1;		// hyperparameter, usually zero
+	// config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
+	// config_2.actFun			= ReLU;
+	// config_2.dactFun		= dReLU;
+	// config_2.learningRate 	= 0.001;
 
-	PoolingConfig config_3;
-	config_3.layerType		= "maxpool";
-	config_3.inputHeight  	= 14;	
-	config_3.inputWidth   	= 14;	
-	config_3.inputDepth   	= 64;	// depend on previous hyperparameter
-	config_3.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
-	config_3.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
+	// PoolingConfig config_3;
+	// config_3.layerType		= "maxpool";
+	// config_3.inputHeight  	= 14;	
+	// config_3.inputWidth   	= 14;	
+	// config_3.inputDepth   	= 64;	// depend on previous hyperparameter
+	// config_3.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
+	// config_3.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
 	FlattenConfig config_4;
 	config_4.layerType	= "flatten";
 	config_4.inputHeight = 7;
 	config_4.inputWidth = 7;
-	config_4.inputDepth = 64;
+	config_4.inputDepth = 32;
 
 	DenseConfig config_5;
 	config_5.layerType = "dense";
-	config_5.inputWidth = 3136;
+	config_5.inputWidth = 1568;
 	config_5.outputWidth = 128;
 	config_5.actFun = Sigmoid;
 	config_5.dactFun = dSigmoid;
@@ -216,8 +216,8 @@ int main(int argc, char ** argv)
 	
 	config.push_back(&config_0);
 	config.push_back(&config_1);
-	config.push_back(&config_2);
-	config.push_back(&config_3);
+	// config.push_back(&config_2);
+	// config.push_back(&config_3);
 	config.push_back(&config_4);
 	config.push_back(&config_5);
 	config.push_back(&config_6);
@@ -241,6 +241,7 @@ int main(int argc, char ** argv)
 		log << MSE << " " << ACC << '\n';
 
 	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
+		// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
 	}
 	std::cout << std::endl;
 	log.close();
