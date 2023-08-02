@@ -271,7 +271,7 @@ void ConvolutionalLayer::propagateForward(std::vector<Matrix *> * input) {
 		// adding biases to caches layer
 		(*caches[i]) += (*biases[i]);
 		// apply activation function in each output
-		(*output[i]) = caches[i] -> unaryExpr(std::ptr_fun(config -> actFun));
+		(*output[i]) = caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> actFun(x);});
 	}
 }
 
@@ -283,7 +283,7 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 	for(size_t i = 0; i < delta.size(); i++)
 	{
 		// loop throught all errors layer calculate layer errors
-		Matrix d = ((*errors)[i] -> array()) * (caches[i] -> unaryExpr(std::ptr_fun(config -> dactFun)).array());
+		Matrix d = ((*errors)[i] -> array()) * (caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array());
 		// Matrix d = *(*errors)[i];
 		delta[i] = d;	
 	}
@@ -307,10 +307,10 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 		// loop through all kernel in our kernel vector
 		for(size_t k = 0; k < kernel.size(); k++)
 		{
+			// update errors vector for next layer
+			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - config -> padding - 1, config -> striding);
 			// update kernel layer l with the calculated error
 			(*kernel[k][l]) += config -> learningRate * corr(*input[l], delta[k], config -> padding, config -> striding);
-			// update errors vector for next layer
-			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - config -> padding - 1, 1);
 			// update biases matrix
 			(*biases[k]) += config -> learningRate * (delta[k]);
 		}

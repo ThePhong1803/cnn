@@ -5,29 +5,30 @@
 #include <string>
 #include <cmath>
 #include <string.h>
+#include <stdint.h>
 #pragma once
 
 
 #pragma pack(push, 1)
 struct BitmapFileHeader {
     char signature[2];
-    std::uint32_t fileSize;
-    std::uint32_t reserved;
-    std::uint32_t dataOffset;
+    uint32_t fileSize;
+    uint32_t reserved;
+    uint32_t dataOffset;
 };
 
 struct BitmapInfoHeader {
-    std::uint32_t headerSize;
-    std::int32_t width;
-    std::int32_t height;
-    std::uint16_t colorPlanes;
-    std::uint16_t bitsPerPixel;
-    std::uint32_t compression;
-    std::uint32_t imageSize;
-    std::int32_t horizontalResolution;
-    std::int32_t verticalResolution;
-    std::uint32_t colorsUsed;
-    std::uint32_t importantColors;
+    uint32_t headerSize;
+    int32_t width;
+    int32_t height;
+    uint16_t colorPlanes;
+    uint16_t bitsPerPixel;
+    uint32_t compression;
+    uint32_t imageSize;
+    int32_t horizontalResolution;
+    int32_t verticalResolution;
+    uint32_t colorsUsed;
+    uint32_t importantColors;
 };
 #pragma pack(pop)
 

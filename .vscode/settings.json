@@ -74,6 +74,14 @@
         "qr": "cpp",
         "lu": "cpp",
         "*.expression": "cpp",
-        "alignedvector3": "cpp"
+        "alignedvector3": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     }
 }

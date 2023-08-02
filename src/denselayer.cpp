@@ -78,9 +78,9 @@ void DenseLayer::propagateForward(std::vector<Matrix *> * input)
     // check input vector size
     assert(input -> size() == 1 && output.size() == 1 && caches.size() == 1); // only 1 matrix element is allowed
     // calculate weighted output;
-    (*caches.back()) = (*input -> back()) * (*weight);
+    (*caches.back()) = (*input -> back()) * (*weight) + (*biases);
     // apply activation fucntion
-    (*output.back()) = caches.back() -> unaryExpr(std::ptr_fun(config -> actFun));
+    (*output.back()) = caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> actFun(x);});
 }
 
 void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
@@ -88,9 +88,10 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     // check erros vector size
     assert(errors -> size() == 1 && output.size() == 1 && caches.size() == 1);
     // calcualte error signal
-    Matrix delta = (errors -> back() -> array()) * (caches.back() -> array().unaryExpr(std::ptr_fun(config -> dactFun)));
+    Matrix delta = (errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array());
     // prepare error for prev layer
     (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
+    // (*errors -> back()) = delta * (weight -> transpose());
 
     // update weight and bias, we will optimize this with mini-batches
     (*weight) += config -> learningRate * (input.back() -> transpose() * delta);

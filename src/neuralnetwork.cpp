@@ -74,7 +74,7 @@ void NeuralNetwork::propagateForward(RowVector& input)
 		// propagate the data forward and then
 		// apply the activation function to your network
 		// unaryExpr applies the given function to all elements of CURRENT_LAYER
-		(*neuronLayers[i + 1]) = cachesLayers[i] -> unaryExpr(std::ptr_fun(actFunPtr[i].first));
+		(*neuronLayers[i + 1]) = cachesLayers[i] -> unaryExpr([this, i](Scalar x) {return this -> actFunPtr[i].first(x);});
     }
 }
 
@@ -90,7 +90,7 @@ void NeuralNetwork::propagateBackward(RowVector& output)
 	RowVector errors = (output - (*neuronLayers[neuronLayers.size() - 1]));
 	for (int i = weights.size() - 1; i >= 0; i--) {
 		// calculate delta of current layer
-		Matrix delta = (errors.array() * (cachesLayers[i] -> unaryExpr(std::ptr_fun(actFunPtr[i].second))).array());
+		Matrix delta = (errors.array() * (cachesLayers[i] -> unaryExpr([this, i](Scalar x) {return this -> actFunPtr[i].second(x);})).array());
 		// we need to error for prev layer before update weight and bias
 		errors = errors * weights[i] -> transpose();		// Cross entropy optimization
 		(*dbias[i]) 	+= delta;

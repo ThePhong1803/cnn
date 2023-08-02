@@ -18,6 +18,9 @@ ConvolutionalNeuralNetwork::ConvolutionalNeuralNetwork(std::vector<LayerConfig *
 		else if (config[i] -> layerType == "dense") {
 			this -> layer.push_back(new DenseLayer((DenseConfig*)config[i]));
 		}
+		else if (config[i] -> layerType == "softmax") {
+			this -> layer.push_back(new SoftmaxLayer((SoftmaxConfig*)config[i]));
+		}
 		else {
 			// clean object instance before exit
 			this -> deleteNetwork();

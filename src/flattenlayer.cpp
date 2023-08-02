@@ -89,7 +89,6 @@ void FlattenLayer::propagateBackward(std::vector<Matrix *> * errors)
     for(size_t i = 0; i < config -> inputDepth; i++)
     {
         // copy each matrix element pointer in temp;
-        errors -> push_back(new Matrix(config -> inputHeight, config -> inputWidth));
-        errors -> back() = temp[i];
+        errors -> push_back(temp[i]);
     }
 }

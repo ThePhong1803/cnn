@@ -1,9 +1,10 @@
 #include <activation.h>
 
-// activation function 
+/* activation function implementation */
+
 Scalar Sigmoid(Scalar x)
 {
-	// sigmoid
+
 	return 1.0f/(1 + exp(-x));
 }
 

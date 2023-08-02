@@ -2,6 +2,10 @@
 #define __COMMON_H__
 #endif
 
+/* optimization preproces directive */
+// #define EIGEN_MPL2_ONLY
+// #define NDEBUG
+
 /* Begin include section */
 #include <iostream>
 #include <fstream>
@@ -12,6 +16,7 @@
 #include <iomanip>
 #include <iomanip>
 #include <activation.h>
+#include <stdint.h>
 /* End include section */
 
 /* Begin typedef section */

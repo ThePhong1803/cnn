@@ -17,12 +17,12 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: C:\\MinGW64\\mingw64\\bin\\g++.exe"
+			"detail": "compiler: C:\\mingw64\\bin\\g++.exe"
 		},
 		{
 			"type": "cppbuild",
 			"label": "Compile test",
-			"command": "C:\\MinGW64\\mingw64\\bin\\g++.exe",
+			"command": "C:\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-Wall",
 				"-g",
@@ -43,7 +43,7 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: C:\\MinGW64\\mingw64\\bin\\g++.exe"
+			"detail": "compiler: C:\\mingw64\\bin\\g++.exe"
 		}
 	]
 }

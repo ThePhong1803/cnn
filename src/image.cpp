@@ -31,8 +31,8 @@ void Image::hexdump(){
 
 void Image::testing(){
 	const std::string table = " .:-=+*#%@";
-	for(std::int32_t i = 0; i < this -> infoHeader.height; i++){
-		for(std::int32_t j = 0; j < this -> infoHeader.width; j++){
+	for(int i = 0; i < this -> infoHeader.height; i++){
+		for(int j = 0; j < this -> infoHeader.width; j++){
 			int32_t idx = convertGrayScale(pixels[i][j]);
 			idx = std::round((float(idx) / 255) * 9);
 			std::cout << table[idx] << table[idx];
@@ -64,8 +64,8 @@ float Image::getFloatValue(int pixel){
 
 std::vector<float> Image::getPixelArray() {
 	std::vector<float> ret(this -> infoHeader.width * this -> infoHeader.height);
-	for(std::int32_t i = 0; i < this -> infoHeader.height; i++){
-		for(std::int32_t j = 0; j < this -> infoHeader.width; j++){
+	for(int i = 0; i < this -> infoHeader.height; i++){
+		for(int j = 0; j < this -> infoHeader.width; j++){
 			float_t factor = 1.0f;
 			if(this -> infoHeader.bitsPerPixel == 24) factor = 255.0f;
 			else if (this -> infoHeader.bitsPerPixel == 8) factor = 8.0f;
