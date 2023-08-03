@@ -26,6 +26,8 @@ uint32_t &SoftmaxConfig::outputWidthRef()
 // class Softmax layer contructor and destructor
 SoftmaxLayer::SoftmaxLayer(SoftmaxConfig * _config) : config(_config)
 {
+	// checking configuation of softmax layer
+	assert(config -> inputWidth == config -> outputWidth);
     this -> output.push_back(new Matrix(1, config -> outputWidth));
     this -> Identity = new Matrix(config -> outputWidth, config -> outputWidth);
 
@@ -87,8 +89,6 @@ void SoftmaxLayer::propagateBackward(std::vector<Matrix *> * errors)
     // create M matrix which have outputwidh duplicate of output vector
     Matrix temp(config -> outputWidth, config -> outputWidth);
     temp = (output.back() -> transpose().rowwise()).replicate(config -> outputWidth);
-    std::cout << temp << std::endl;
-    temp = temp.array() * ((*this -> Identity) - temp.transpose()).array();
-    temp = temp.dot(delta.transpose());
-    (*errors -> back()) = temp;
+    temp = (temp.array() * ((*this -> Identity) - temp.transpose()).array());
+	(*errors -> back()) = delta * temp;
 }

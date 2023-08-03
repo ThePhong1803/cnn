@@ -99,14 +99,22 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 										 std::vector<std::vector<Matrix *>> output,
 										 int batchSize)
 {
+	// fist we shuffle train data
+	auto rng = std::default_random_engine {};
+	std::vector<std::pair<std::vector<Matrix *> *,std::vector<Matrix *> *>> dataset;
+	for(size_t i = 0; i < input.size(); i++){
+		dataset.push_back(std::pair<std::vector<Matrix *> *,std::vector<Matrix *> *>(&input[i], &output[i]));
+	}
+	// using random engine to shuffle the dataset
+	std::shuffle(std::begin(dataset), std::end(dataset), rng);
 	// loop through all element in batches and train the network, after that we calculate the error
 	Scalar MSE = 0;
 	for(int n = 0; n < batchSize; n++)
 	{
-		this -> propagateForward(input[n]);
-		this -> propagateBackward(output[n]);
+		this -> propagateForward(*dataset[n].first);
+		this -> propagateBackward(*dataset[n].second);
 		// calculate mean square errors
-		MSE += 0.5 *(RowVector(*output[n].back()) - RowVector(*layer.back() -> outputRef().back())).dot(RowVector(*output[n].back()) - RowVector(*layer.back() -> outputRef().back()));
+		MSE += 0.5 *(RowVector(*dataset[n].second -> back()) - RowVector(*layer.back() -> outputRef().back())).dot(RowVector(*dataset[n].second -> back()) - RowVector(*layer.back() -> outputRef().back()));
 		std::cout << "\rTrain process: " << float(n + 1) / batchSize;
 	}
 	return MSE / batchSize;

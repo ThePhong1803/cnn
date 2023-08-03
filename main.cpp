@@ -7,7 +7,7 @@
 #define DATASIZE 60000
 #define TESTSIZE 10000
 #define TEST     100
-#define TESTING
+// #define TESTING
 
 void loadDataset(   std::vector<std::vector<Matrix *>> &input_data,             // input data
                     std::vector<std::vector<Matrix *>> &output_data,            // output data
@@ -225,14 +225,14 @@ int main(int argc, char ** argv)
 	DenseConfig config_6;
 	config_6.layerType = "dense";
 	config_6.inputWidth = 512;
-	config_6.outputWidth = 256;
+	config_6.outputWidth = 10;
 	config_6.actFun = Sigmoid;
 	config_6.dactFun = dSigmoid;
 	config_6.learningRate = learningRate;
 
 	SoftmaxConfig config_7;
 	config_7.layerType = "softmax";
-	config_7.inputWidth = 256;
+	config_7.inputWidth = 10;
 	config_7.outputWidth = 10;
 	config_7.learningRate = learningRate;
 	
@@ -303,129 +303,146 @@ int main(int argc, char ** argv)
 #else
 int main(int argc, char ** argv){
 	
-	// srand(time(NULL));
-	// // float learnRate = atof(argv[1]);
-	// float learningRate = atof(argv[1]);
-	// int epoch		   = atoi(argv[2]);
-	// int batchSize	   = atoi(argv[3]);
-	// std::cout << "Epoch: " << epoch << std::endl;
-	// std::cout << "Batch size: " << batchSize << std::endl;
+	srand(time(NULL));
+	// float learnRate = atof(argv[1]);
+	float learningRate = atof(argv[1]);
+	int epoch		   = atoi(argv[2]);
+	int batchSize	   = atoi(argv[3]);
+	std::cout << "Epoch: " << epoch << std::endl;
+	std::cout << "Batch size: " << batchSize << std::endl;
 
-	// // loading dataset
-	// /* - Fist is setup input data containter, then the expected output data container */
-	// std::vector<std::vector<Matrix *>> input_data;
-	// std::vector<std::vector<Matrix *>> output_data;
-	// std::vector<std::vector<Matrix>>   targetOutputs(10, std::vector<Matrix>(1, Matrix(1, 10))); 
+	// loading dataset
+	/* - Fist is setup input data containter, then the expected output data container */
+	std::vector<std::vector<Matrix *>> input_data;
+	std::vector<std::vector<Matrix *>> output_data;
+	std::vector<std::vector<Matrix>>   targetOutputs(10, std::vector<Matrix>(1, Matrix(1, 10))); 
 	
-    // /* - Create labeled array for mapping */
-    // std::vector<int*> labelVec;
-    // std::ifstream labelFile;
-    // labelFile.open("dataset/training_dataset/label.txt");
-    // if(!labelFile.is_open()) {
-    //     std::cout << "File not found" << std::endl;
-    //     exit(-1);
-    // }
+    /* - Create labeled array for mapping */
+    std::vector<int*> labelVec;
+    std::ifstream labelFile;
+    labelFile.open("dataset/training_dataset/label.txt");
+    if(!labelFile.is_open()) {
+        std::cout << "File not found" << std::endl;
+        exit(-1);
+    }
 
-    // int label;
-    // while(labelFile >> label){
-    //     labelVec.push_back(new int(label));
-    // }
-	// labelFile.close();   
+    int label;
+    while(labelFile >> label){
+        labelVec.push_back(new int(label));
+    }
+	labelFile.close();   
 
-	// std::vector<int*> validateLabels;
-    // std::ifstream validateLabelsFile;
-    // validateLabelsFile.open("dataset/test_dataset/00000-labels.txt");
-    // if(!validateLabelsFile.is_open()) {
-    //     std::cout << "File not found" << std::endl;
-    //     exit(-1);
-    // }
+	std::vector<int*> validateLabels;
+    std::ifstream validateLabelsFile;
+    validateLabelsFile.open("dataset/test_dataset/00000-labels.txt");
+    if(!validateLabelsFile.is_open()) {
+        std::cout << "File not found" << std::endl;
+        exit(-1);
+    }
 
-    // int testLabel;
-    // while(validateLabelsFile >> testLabel){
-    //     validateLabels.push_back(new int(testLabel));
-    // }
-	// validateLabelsFile.close(); 
+    int testLabel;
+    while(validateLabelsFile >> testLabel){
+        validateLabels.push_back(new int(testLabel));
+    }
+	validateLabelsFile.close(); 
 
-	// /* - Mapping the expected output data to the output data container */
-	// for(int i = 0; i < 10; i++){
-	// 	for(int j = 0; j < 10; j++){
-	// 		if(i == j){
-	// 			targetOutputs[i][0].coeffRef(0, j) = 1.0f;
-	// 		}
-	// 		else {
-	// 			targetOutputs[i][0].coeffRef(0, j) = 0.0f;
-	// 		}
-	// 	}
-	// }
+	/* - Mapping the expected output data to the output data container */
+	for(int i = 0; i < 10; i++){
+		for(int j = 0; j < 10; j++){
+			if(i == j){
+				targetOutputs[i][0].coeffRef(0, j) = 1.0f;
+			}
+			else {
+				targetOutputs[i][0].coeffRef(0, j) = 0.0f;
+			}
+		}
+	}
 
-	// std::vector<LayerConfig *> config;
-	// FlattenConfig config_4;
-	// config_4.layerType	= "flatten";
-	// config_4.inputHeight = 28;
-	// config_4.inputWidth = 28;
-	// config_4.inputDepth = 1;
+	std::vector<LayerConfig *> config;
+	FlattenConfig config_4;
+	config_4.layerType	= "flatten";
+	config_4.inputHeight = 28;
+	config_4.inputWidth = 28;
+	config_4.inputDepth = 1;
 
-	// DenseConfig config_5;
-	// config_5.layerType = "dense";
-	// config_5.inputWidth = 784;
-	// config_5.outputWidth = 32;
-	// config_5.actFun = Sigmoid;
-	// config_5.dactFun = dSigmoid;
-	// config_5.learningRate = learningRate;
+	DenseConfig config_5;
+	config_5.layerType = "dense";
+	config_5.inputWidth = 784;
+	config_5.outputWidth = 256;
+	config_5.actFun = Sigmoid;
+	config_5.dactFun = dSigmoid;
+	config_5.learningRate = learningRate;
 
-	// DenseConfig config_6;
-	// config_6.layerType = "dense";
-	// config_6.inputWidth = 32;
-	// config_6.outputWidth = 32;
-	// config_6.actFun = Sigmoid;
-	// config_6.dactFun = dSigmoid;
-	// config_6.learningRate = learningRate;
+	DenseConfig config_6;
+	config_6.layerType = "dense";
+	config_6.inputWidth = 256;
+	config_6.outputWidth = 10;
+	config_6.actFun = Sigmoid;
+	config_6.dactFun = dSigmoid;
+	config_6.learningRate = learningRate;
 
-	// DenseConfig config_7;
-	// config_7.layerType = "dense";
-	// config_7.inputWidth = 32;
-	// config_7.outputWidth = 10;
-	// config_7.actFun = Sigmoid;
-	// config_7.dactFun = dSigmoid;
-	// config_7.learningRate = learningRate;
+	DenseConfig config_7;
+	config_7.layerType = "softmax";
+	config_7.inputWidth = 10;
+	config_7.outputWidth = 10;
 	
-	// // config.push_back(&config_0);
-	// // config.push_back(&config_1);
-	// // config.push_back(&config_2);
-	// // config.push_back(&config_3);
-	// config.push_back(&config_4);
-	// config.push_back(&config_5);
-	// config.push_back(&config_6);
-	// config.push_back(&config_7);
+	// config.push_back(&config_0);
+	// config.push_back(&config_1);
+	// config.push_back(&config_2);
+	// config.push_back(&config_3);
+	config.push_back(&config_4);
+	config.push_back(&config_5);
+	config.push_back(&config_6);
+	config.push_back(&config_7);
 
-	// ConvolutionalNeuralNetwork cnn(config);
+	ConvolutionalNeuralNetwork cnn(config);
 
-	// /* - Training with loaded data */
-	// std::cout << std::fixed << std::setprecision(2);
-	// for(int i = 0; i < epoch; i++){
-	// 	/* Train and validate after each batch*/
-    //     loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
-	// 	Scalar MSE = cnn.train(input_data, output_data, batchSize);
-	// 	cleanDataBuffer(input_data);
-	// 	cleanLabelBuffer(output_data);
-	// 	loadTestData(input_data, output_data, targetOutputs, validateLabels, TESTSIZE - 1);
-	// 	Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TESTSIZE - 1);
-	// 	cleanDataBuffer(input_data);
-	// 	cleanLabelBuffer(output_data);
+	/* - Training with loaded data */
+	// prepare log file
+	std::ofstream log("./log/RMSE.txt");
+	log << "RMSE" << " " << "ACC" << '\n';
+	std::cout << std::fixed << std::setprecision(4);
+	for(int i = 0; i < epoch; i++){
+		/* Train and validate after each batch*/
+        loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
+		Scalar MSE = cnn.train(input_data, output_data, batchSize);
+		cleanDataBuffer(input_data);
+		cleanLabelBuffer(output_data);
+		loadTestData(input_data, output_data, targetOutputs, validateLabels, TESTSIZE - 1);
+		Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TESTSIZE - 1);
+		cleanDataBuffer(input_data);
+		cleanLabelBuffer(output_data);
 
-	//  	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
-	// 	// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
-	// }
-	// std::cout << std::endl;
+		/* Save to log file after each epoch */
+		log << MSE << " " << ACC << '\n';
 
-	// Softmax testing proto
-	Matrix mat1(4,4);
-	mat1.setZero();
-	std::cout << "Before: " << &mat1 << std::endl;
-	Matrix mat2(1,4);
-	mat2 << 1,2,3,4;
-	mat1 = mat2.transpose().rowwise().replicate(4);
-	std::cout << "After: " << &mat1 << std::endl;
-	std::cout << mat1 << std::endl;
+	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
+	}
+	log.close();
+	loadTestData(input_data, output_data, targetOutputs, validateLabels, TESTSIZE - 1);
+	Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TESTSIZE - 1);
+	cleanDataBuffer(input_data);
+	cleanLabelBuffer(output_data);
+	std::cout << "\rOverall Accuracy: " << ACC << std::endl;
+
+	std::string cmd = "";
+	while(cmd != "exit"){
+		// get test sample
+		Image img("test-img/test.bmp", -1);		// open image for diesplay
+		ImageData obj("test-img/test.bmp");		// open image for extract data
+        img.setInvert(false);
+
+		Matrix testData(img.getHeight(), img.getWidth()); 	// input data storage
+		obj.getPixelMatrix(&testData);						// load pixel data into testing input matrix
+		std::vector<Matrix *> test;							// create vector containter for input matrix
+		test.push_back(&testData);							
+		cnn.propagateForward(test);							// propagate forward testing input matrix vector
+		img.testing();										// display test sample
+		
+		int num = outputToLabelIdx(cnn.layer.back() -> outputRef().back());
+		std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn.layer.back() -> outputRef().back() -> coeff(num) << std::endl;
+		std::cout << "Output vector: " << *cnn.layer.back() -> outputRef().back() << std::endl;
+		getline(std::cin, cmd);
+	}
 }
 #endif

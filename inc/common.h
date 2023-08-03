@@ -17,6 +17,9 @@
 #include <iomanip>
 #include <activation.h>
 #include <stdint.h>
+#include <algorithm>
+#include <iterator>
+#include <random>
 /* End include section */
 
 /* Begin typedef section */
