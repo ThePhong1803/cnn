@@ -107,7 +107,7 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 		this -> propagateForward(*dataset[n].first);
 		// calculate error matrix
 		std::vector<Matrix *> errors = dBinaryCrossEntropy(&layer.back() -> outputRef(), dataset[n].second);
-		loss += BinaryCrossEntropy((RowVector*)layer.back() -> outputRef().back(), (RowVector*)dataset[n].second -> back());
+		loss += BinaryCrossEntropy(layer.back() -> outputRef().back(), dataset[n].second -> back());
 		this -> propagateBackward(errors);
 		std::cout << "\rTrain process: " << float(n + 1) / batchSize;
 	}

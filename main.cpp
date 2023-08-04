@@ -7,7 +7,7 @@
 #define DATASIZE 60000
 #define TESTSIZE 10000
 #define TEST     100
-#define TESTING
+// #define TESTING
 
 void loadDataset(   std::vector<std::vector<Matrix *>> &input_data,             // input data
                     std::vector<std::vector<Matrix *>> &output_data,            // output data
@@ -93,7 +93,6 @@ int outputToLabelIdx(Matrix * out){
 	}
 	return idx;
 }
-// #define TESTING
 
 #ifndef TESTING
 int main(int argc, char ** argv)
@@ -171,7 +170,7 @@ int main(int argc, char ** argv)
 	config_0.inputDepth   = 1;
 	config_0.kernelHeight = 3;	// hyperparameter
 	config_0.kernelWidth  = 3;	// hyperparameter
-	config_0.numKernel    = 32;		// hyperparameter
+	config_0.numKernel    = 8;		// hyperparameter
 	config_0.padding      = 1;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
 	config_0.actFun		  = tanhAct;
@@ -182,7 +181,7 @@ int main(int argc, char ** argv)
 	config_1.layerType		= "maxpool";
 	config_1.inputHeight  	= 28;	
 	config_1.inputWidth   	= 28;	
-	config_1.inputDepth   	= 32;	// depend on previous hyperparameter
+	config_1.inputDepth   	= 8;	// depend on previous hyperparameter
 	config_1.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
 	config_1.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
@@ -190,10 +189,10 @@ int main(int argc, char ** argv)
 	config_2.layerType		= "conv";
 	config_2.inputHeight  	= 14;	 
 	config_2.inputWidth   	= 14;	
-	config_2.inputDepth   	= 32;		// depend on previous hyperparameter
+	config_2.inputDepth   	= 8;		// depend on previous hyperparameter
 	config_2.kernelHeight 	= 3;	// hyperparameter
 	config_2.kernelWidth  	= 3;	// hyperparameter
-	config_2.numKernel    	= 64;		// hyperparameter
+	config_2.numKernel    	= 16;		// hyperparameter
 	config_2.padding      	= 1;		// hyperparameter, usually zero
 	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
 	config_2.actFun			= tanhAct;
@@ -204,7 +203,7 @@ int main(int argc, char ** argv)
 	config_3.layerType		= "maxpool";
 	config_3.inputHeight  	= 14;	
 	config_3.inputWidth   	= 14;	
-	config_3.inputDepth   	= 64;	// depend on previous hyperparameter
+	config_3.inputDepth   	= 16;	// depend on previous hyperparameter
 	config_3.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
 	config_3.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
@@ -212,19 +211,19 @@ int main(int argc, char ** argv)
 	config_4.layerType	= "flatten";
 	config_4.inputHeight = 7;
 	config_4.inputWidth = 7;
-	config_4.inputDepth = 64;
+	config_4.inputDepth = 16;
 
 	DenseConfig config_5;
 	config_5.layerType = "dense";
-	config_5.inputWidth = 3136;
-	config_5.outputWidth = 512;
+	config_5.inputWidth = 784;
+	config_5.outputWidth = 128;
 	config_5.actFun = Sigmoid;
 	config_5.dactFun = dSigmoid;
 	config_5.learningRate = learningRate;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
-	config_6.inputWidth = 512;
+	config_6.inputWidth = 128;
 	config_6.outputWidth = 10;
 	config_6.actFun = Sigmoid;
 	config_6.dactFun = dSigmoid;
@@ -234,7 +233,6 @@ int main(int argc, char ** argv)
 	config_7.layerType = "softmax";
 	config_7.inputWidth = 10;
 	config_7.outputWidth = 10;
-	config_7.learningRate = learningRate;
 	
 	config.push_back(&config_0);
 	config.push_back(&config_1);
@@ -249,7 +247,7 @@ int main(int argc, char ** argv)
 
 	/* - Training with loaded data */
 	std::ofstream log("./log/RMSE.txt");
-	log << "RMSE" << " " << "ACC" << '\n';
+	log << "LOSS" << " " << "ACC" << '\n';
 	std::cout << std::fixed << std::setprecision(4);
 	for(int i = 0; i < epoch; i++){
 		srand(time(NULL));
@@ -266,7 +264,7 @@ int main(int argc, char ** argv)
 		/* Save to log file after each epoch */
 		log << MSE << " " << ACC << '\n';
 
-	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
+	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " LOSS: " << MSE << std::endl;
 	}
 	std::cout << std::endl;
 	log.close();
@@ -445,30 +443,43 @@ int main(int argc, char ** argv){
 	// 	getline(std::cin, cmd);
 	// }
 
-	SoftmaxConfig config;
-	config.inputWidth = 4;
-	config.outputWidth = 4;
+	// // SoftmaxConfig config;
+	// // config.inputWidth = 4;
+	// // config.outputWidth = 4;
 	
-	SoftmaxLayer layer(&config);
-	std::vector<Matrix *> input;
-	Matrix * in = new Matrix(1,4);
-	*in << 0,1,0,1;
-	input.push_back(in);
+	// // SoftmaxLayer layer(&config);
+	// // std::vector<Matrix *> input;
+	// // Matrix * in = new Matrix(1,4);
+	// // *in << 0,1,0,1;
+	// // input.push_back(in);
 	
-	std::vector<Matrix *> output;
-	Matrix * out = new Matrix(1,4);
-	*out << 0,0,1,0;
-	output.push_back(out);
+	// // std::vector<Matrix *> output;
+	// // Matrix * out = new Matrix(1,4);
+	// // *out << 0,0,1,0;
+	// // output.push_back(out);
 	
-	layer.propagateForward(&input);
-	std::cout << "Predicted output" << std::endl;
-	std::cout << *layer.outputRef().back() << std::endl;
-	layer.propagateBackward(&output);
-	std::cout << "Gradient" << std::endl;
-	std::cout << *output.back() << std::endl;
+	// // layer.propagateForward(&input);
+	// // std::cout << "Predicted output" << std::endl;
+	// // std::cout << *layer.outputRef().back() << std::endl;
+	// // layer.propagateBackward(&output);
+	// // std::cout << "Gradient" << std::endl;
+	// // std::cout << *output.back() << std::endl;
 	
-	delete in;
-	delete out;
+	// // delete in;
+	// // delete out;
+	// // // Testing loss function
+	// Matrix * y_true = new Matrix(1,4);
+	// Matrix * y_pred = new Matrix(1,4);
+	// *y_true << 0.0, 0.0, 0.0, 1.0;
+	// *y_pred << 0.1, 0.2, 0.1, 0.6;
+	// std::vector<Matrix *> pred;
+	// std::vector<Matrix *> expc;
+	// pred.push_back(y_pred);
+	// expc.push_back(y_true); 
+	// std::cout << BinaryCrossEntropy(y_pred, y_true) << std::endl;
+	// std::cout << *dBinaryCrossEntropy(&pred, &expc).back() << std::endl;
+	// delete y_true;
+	// delete y_pred;
 	return 0;
 }
 #endif
