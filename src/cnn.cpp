@@ -71,16 +71,8 @@ void ConvolutionalNeuralNetwork::propagateForward(std::vector<Matrix *> input)
 }
 
 // Implement convolutional nerual network propagate backward method
-void ConvolutionalNeuralNetwork::propagateBackward(std::vector<Matrix*> expected)
+void ConvolutionalNeuralNetwork::propagateBackward(std::vector<Matrix*> errors)
 {
-	// calculate error matrix
-	std::vector<Matrix *> errors;
-	for(size_t i = 0; i < layer.back() -> outputRef().size(); i++)
-	{
-		errors.push_back(new Matrix(expected[i] -> rows(), expected[i] -> cols()));
-		*errors[i] = *expected[i] - *layer.back() -> outputRef()[i];
-	}
-
 	// propagate the errors back to all hidden layer
 	for(int i = (int)layer.size() - 1; i >= 0; i--)
 	{
@@ -108,16 +100,18 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 	// using random engine to shuffle the dataset
 	std::shuffle(std::begin(dataset), std::end(dataset), rng);
 	// loop through all element in batches and train the network, after that we calculate the error
-	Scalar MSE = 0;
+	Scalar loss = 0;
 	for(int n = 0; n < batchSize; n++)
 	{
+		// propagate forward train data
 		this -> propagateForward(*dataset[n].first);
-		this -> propagateBackward(*dataset[n].second);
-		// calculate mean square errors
-		MSE += 0.5 *(RowVector(*dataset[n].second -> back()) - RowVector(*layer.back() -> outputRef().back())).dot(RowVector(*dataset[n].second -> back()) - RowVector(*layer.back() -> outputRef().back()));
+		// calculate error matrix
+		std::vector<Matrix *> errors = dBinaryCrossEntropy(&layer.back() -> outputRef(), dataset[n].second);
+		loss += BinaryCrossEntropy((RowVector*)layer.back() -> outputRef().back(), (RowVector*)dataset[n].second -> back());
+		this -> propagateBackward(errors);
 		std::cout << "\rTrain process: " << float(n + 1) / batchSize;
 	}
-	return MSE / batchSize;
+	return loss / batchSize;
 }
 
 Scalar ConvolutionalNeuralNetwork::validate(std::vector<std::vector<Matrix *>> input,

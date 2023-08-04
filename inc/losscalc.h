@@ -3,10 +3,10 @@
 
 #include <common.h>
 // Mean square error loss function
-Scalar 				   MeanSquareError(Matrix * vec, Matrix * expected);
+Scalar 				   MeanSquareError(RowVector * vec, RowVector * expected);
 std::vector<Matrix *> dMeanSquareError(std::vector<Matrix *> * output, std::vector<Matrix *> * expected);
 
 // Binary crosss entropy loss function
-Scalar 				   BinaryCrossEntropy(Matrix * vec, Matrix * expected);
+Scalar 				   BinaryCrossEntropy(RowVector * vec, RowVector * expected);
 std::vector<Matrix *> dBinaryCrossEntropy(std::vector<Matrix *> * output, std::vector<Matrix *> * expected);
 #endif

@@ -7,6 +7,7 @@
 #include <flattenlayer.h>
 #include <denselayer.h>
 #include <softmaxlayer.h>
+#include <losscalc.h>
 
 // create class prototype
 class ConvolutionalNeuralNetwork

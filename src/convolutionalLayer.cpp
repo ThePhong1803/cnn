@@ -271,7 +271,7 @@ void ConvolutionalLayer::propagateForward(std::vector<Matrix *> * input) {
 		// adding biases to caches layer
 		(*caches[i]) += (*biases[i]);
 		// apply activation function in each output
-		(*output[i]) = caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> actFun(x);});
+		(*output[i]) = caches[i] -> unaryExpr([this](Scalar x){return this -> config -> actFun(x);});
 	}
 }
 
