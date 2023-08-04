@@ -55,7 +55,7 @@ Matrix corr(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding) {
 				the output matrix using its indexes, they increase by 1 each loop. By multiplying them by striding
 				result in aligining them correctly
 			*/
-			res.coeffRef(i, j) = (input.block(i * striding, j * striding, kernel.rows(), kernel.cols()).array() * kernel.array()).sum();
+			res.coeffRef(i, j) = Matrix((input.block(i * striding, j * striding, kernel.rows(), kernel.cols()).array() * kernel.array())).sum();
 		}
 	}
 	return res;
@@ -116,7 +116,7 @@ Matrix conv(Matrix &mat, Matrix &kernel, uint32_t padding, uint32_t striding){
 				the output matrix using its indexes, they increase by 1 each loop. By multiplying them by striding
 				result in aliginning them correctly
 			*/
-			res.coeffRef(i, j) = (input.block(i * striding, j * striding, rot180Kernel.rows(), rot180Kernel.cols()).array() * rot180Kernel.array()).sum();
+			res.coeffRef(i, j) = Matrix((input.block(i * striding, j * striding, rot180Kernel.rows(), rot180Kernel.cols()).array() * rot180Kernel.array())).sum();
 		}
 	}
 	return res;
@@ -283,7 +283,7 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 	for(size_t i = 0; i < delta.size(); i++)
 	{
 		// loop throught all errors layer calculate layer errors
-		Matrix d = ((*errors)[i] -> array()) * (caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array());
+		Matrix d = Matrix(((*errors)[i] -> array()) * (caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
 		// Matrix d = *(*errors)[i];
 		delta[i] = d;	
 	}

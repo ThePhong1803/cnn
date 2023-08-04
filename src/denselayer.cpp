@@ -88,7 +88,7 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     // check erros vector size
     assert(errors -> size() == 1 && output.size() == 1 && caches.size() == 1);
     // calcualte error signal
-    Matrix delta = (errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array());
+    Matrix delta = Matrix((errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
     // prepare error for prev layer
     (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
     // (*errors -> back()) = delta * (weight -> transpose());

@@ -89,6 +89,6 @@ void SoftmaxLayer::propagateBackward(std::vector<Matrix *> * errors)
     // create M matrix which have outputwidh duplicate of output vector
     Matrix temp(config -> outputWidth, config -> outputWidth);
     temp = (output.back() -> transpose().rowwise()).replicate(config -> outputWidth);
-    temp = (temp.array() * ((*this -> Identity) - temp.transpose()).array());
+    temp = Matrix(((*this -> Identity) - temp.transpose()).array() * temp.array());
 	(*errors -> back()) = delta * temp;
 }
