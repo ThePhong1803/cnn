@@ -3,6 +3,7 @@
 
 #include <common.h>
 #include <interface.h>
+#include <activation.h>
 
 // dense layer configuration class
 class DenseConfig : public LayerConfig

@@ -3,6 +3,7 @@
 
 #include <interface.h>
 #include <common.h>
+#include <activation.h>
 
 // method needed for this layer
 Matrix corr(Matrix & mat, Matrix & kernel, uint32_t padding = 0, uint32_t striding = 1);

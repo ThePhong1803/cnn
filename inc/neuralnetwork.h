@@ -2,6 +2,7 @@
 #define __NEURAL_NETWORK_H__
 
 #include <common.h>
+#include <activation.h>
 #pragma once
 
 // use typedefs for future ease for changing data types like : float to double

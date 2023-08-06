@@ -47,6 +47,7 @@ void ImageData::getPixelVector(RowVector * temp)
 // method to copy pixel array to matrix
 void ImageData::getPixelMatrix(Matrix * mat)
 {
+    // copy each pixel data into matrix
     for(int32_t r = 0; r < mat -> rows(); r++)
     {
         for(int32_t c = 0; c < mat -> cols(); c++)
@@ -54,4 +55,6 @@ void ImageData::getPixelMatrix(Matrix * mat)
             mat -> coeffRef(r, c) = this -> pixels[r * mat -> cols() + c];
         }
     }
+    // normalize data
+    mat -> normalize();
 }

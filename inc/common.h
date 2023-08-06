@@ -1,10 +1,9 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
-#endif
 
 /* optimization preproces directive */
-// #define EIGEN_MPL2_ONLY
-// #define NDEBUG
+#define EIGEN_MPL2_ONLY
+#define NDEBUG
 
 /* Begin include section */
 #include <iostream>
@@ -15,7 +14,6 @@
 #include <assert.h>
 #include <iomanip>
 #include <iomanip>
-#include <activation.h>
 #include <stdint.h>
 #include <algorithm>
 #include <iterator>
@@ -32,3 +30,5 @@ typedef uint32_t uint;
 typedef Scalar (*ScalarFunPtr)(Scalar);
 
 /* End typedef section */
+
+#endif

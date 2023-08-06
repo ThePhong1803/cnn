@@ -3,6 +3,7 @@
 
 #include <common.h>
 #include <interface.h>
+#include <activation.h>
 
 // Softmax layer configuration class
 class SoftmaxConfig : public LayerConfig

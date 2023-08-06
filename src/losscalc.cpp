@@ -18,9 +18,14 @@ std::vector<Matrix *> dMeanSquareError(std::vector<Matrix *> * output, std::vect
 }
 
 // binary cross entropy loss function
+// Scalar 	BinaryCrossEntropy(Matrix * vec, Matrix * expected) {
+// 	return (Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x);})).array())) - Matrix((expected -> unaryExpr([](Scalar x) -> Scalar { return 1 - x;})).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(1 - x);})).array())).mean();
+// }
+
 Scalar 	BinaryCrossEntropy(Matrix * vec, Matrix * expected) {
-	return (Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x);})).array())) - Matrix((expected -> unaryExpr([](Scalar x) -> Scalar { return 1 - x;})).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(1 - x);})).array())).mean();
+	return Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x);})).array())).mean();
 }
+
 std::vector<Matrix *> dBinaryCrossEntropy(std::vector<Matrix *> * output, std::vector<Matrix *> * expected)
 {
 	std::vector<Matrix *> errors;

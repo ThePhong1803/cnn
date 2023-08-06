@@ -2,6 +2,7 @@
 #define __POOLLAYER_H__
 #include <common.h>
 #include <interface.h>
+#include <activation.h>
 
 class PoolingConfig : public LayerConfig {
 	public:

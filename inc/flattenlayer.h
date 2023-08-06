@@ -3,6 +3,7 @@
 
 #include <common.h>
 #include <interface.h>
+#include <activation.h>
 
 // class layer config
 class FlattenConfig : public LayerConfig
