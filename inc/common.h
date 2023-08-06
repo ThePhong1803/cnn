@@ -3,7 +3,7 @@
 
 /* optimization preproces directive */
 #define EIGEN_MPL2_ONLY
-#define NDEBUG
+// #define NDEBUG
 
 /* Begin include section */
 #include <iostream>

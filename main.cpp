@@ -170,7 +170,7 @@ int main(int argc, char ** argv)
 	config_0.inputDepth   = 1;
 	config_0.kernelHeight = 5;	// hyperparameter
 	config_0.kernelWidth  = 5;	// hyperparameter
-	config_0.numKernel    = 8;		// hyperparameter
+	config_0.numKernel    = 6;		// hyperparameter
 	config_0.padding      = 2;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
 	config_0.actFun		  = tanhAct;
@@ -181,7 +181,7 @@ int main(int argc, char ** argv)
 	config_1.layerType		= "maxpool";
 	config_1.inputHeight  	= 28;	
 	config_1.inputWidth   	= 28;	
-	config_1.inputDepth   	= 8;	// depend on previous hyperparameter
+	config_1.inputDepth   	= 6;	// depend on previous hyperparameter
 	config_1.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
 	config_1.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
@@ -189,10 +189,10 @@ int main(int argc, char ** argv)
 	config_2.layerType		= "conv";
 	config_2.inputHeight  	= 14;	 
 	config_2.inputWidth   	= 14;	
-	config_2.inputDepth   	= 8;		// depend on previous hyperparameter
+	config_2.inputDepth   	= 6;		// depend on previous hyperparameter
 	config_2.kernelHeight 	= 5;	// hyperparameter
 	config_2.kernelWidth  	= 5;	// hyperparameter
-	config_2.numKernel    	= 16;		// hyperparameter
+	config_2.numKernel    	= 12;		// hyperparameter
 	config_2.padding      	= 0;		// hyperparameter, usually zero
 	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
 	config_2.actFun			= tanhAct;
@@ -203,7 +203,7 @@ int main(int argc, char ** argv)
 	config_3.layerType		= "maxpool";
 	config_3.inputHeight  	= 10;	
 	config_3.inputWidth   	= 10;	
-	config_3.inputDepth   	= 16;	// depend on previous hyperparameter
+	config_3.inputDepth   	= 12;	// depend on previous hyperparameter
 	config_3.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
 	config_3.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
@@ -211,12 +211,12 @@ int main(int argc, char ** argv)
 	config_4.layerType	= "flatten";
 	config_4.inputHeight = 5;
 	config_4.inputWidth = 5;
-	config_4.inputDepth = 16;
+	config_4.inputDepth = 12;
 
 	DenseConfig config_5;
 	config_5.layerType = "dense";
-	config_5.inputWidth = 400;
-	config_5.outputWidth = 128;
+	config_5.inputWidth = 300;
+	config_5.outputWidth = 256;
 	config_5.actFun = tanhAct;
 	config_5.dactFun = dtanhAct;
 	config_5.learningRate = learningRate;
@@ -224,7 +224,7 @@ int main(int argc, char ** argv)
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
-	config_6.inputWidth = 128;
+	config_6.inputWidth = 256;
 	config_6.outputWidth = 10;
 	config_6.actFun = tanhAct;
 	config_6.dactFun = dtanhAct;
