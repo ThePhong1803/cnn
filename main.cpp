@@ -6,7 +6,10 @@
 #define DATASIZE 60000
 #define TESTSIZE 10000
 #define TEST 	 TESTSIZE - 1
-// #define TESTING
+#define TESTING
+
+Scalar linear(Scalar x) { return x; }
+Scalar dlinear(Scalar x) { return 1; }
 
 void loadDataset(   std::vector<std::vector<Matrix *>> &input_data,             // input data
                     std::vector<std::vector<Matrix *>> &output_data,            // output data
@@ -303,140 +306,210 @@ int main(int argc, char ** argv)
 #else 
 	
 int main(int argc, char ** argv){
-	// srand(time(NULL));
-	// float learningRate = atof(argv[1]);
-	// int epoch		   = atoi(argv[2]);
-	// int batchSize	   = atoi(argv[3]);
-	// std::cout << "Epoch: " << epoch << std::endl;
-	// std::cout << "Batch size: " << batchSize << std::endl;
+	srand(time(NULL));
+	float learningRate = atof(argv[1]);
+	int epoch		   = atoi(argv[2]);
+	int batchSize	   = atoi(argv[3]);
+	std::cout << "Epoch: " << epoch << std::endl;
+	std::cout << "Batch size: " << batchSize << std::endl;
 
-	// // loading dataset
-	// /* - Fist is setup input data containter, then the expected output data container */
-	// std::vector<std::vector<Matrix *>> input_data;
-	// std::vector<std::vector<Matrix *>> output_data;
-	// std::vector<std::vector<Matrix>>   targetOutputs(10, std::vector<Matrix>(1, Matrix(1, 10))); 
+	// loading dataset
+	/* - Fist is setup input data containter, then the expected output data container */
+	std::vector<std::vector<Matrix *>> input_data;
+	std::vector<std::vector<Matrix *>> output_data;
+	std::vector<std::vector<Matrix>>   targetOutputs(10, std::vector<Matrix>(1, Matrix(1, 10))); 
 	
-    // /* - Create labeled array for mapping */
-    // std::vector<int*> labelVec;
-    // std::ifstream labelFile;
-    // labelFile.open("dataset/training_dataset/label.txt");
-    // if(!labelFile.is_open()) {
-        // std::cout << "File not found" << std::endl;
-        // exit(-1);
-    // }
+    /* - Create labeled array for mapping */
+    std::vector<int*> labelVec;
+    std::ifstream labelFile;
+    labelFile.open("dataset/training_dataset/label.txt");
+    if(!labelFile.is_open()) {
+        std::cout << "File not found" << std::endl;
+        exit(-1);
+    }
 
-    // int label;
-    // while(labelFile >> label){
-        // labelVec.push_back(new int(label));
-    // }
-	// labelFile.close();   
+    int label;
+    while(labelFile >> label){
+        labelVec.push_back(new int(label));
+    }
+	labelFile.close();   
 
-	// std::vector<int*> validateLabels;
-    // std::ifstream validateLabelsFile;
-    // validateLabelsFile.open("dataset/test_dataset/00000-labels.txt");
-    // if(!validateLabelsFile.is_open()) {
-        // std::cout << "File not found" << std::endl;
-        // exit(-1);
-    // }
+	std::vector<int*> validateLabels;
+    std::ifstream validateLabelsFile;
+    validateLabelsFile.open("dataset/test_dataset/00000-labels.txt");
+    if(!validateLabelsFile.is_open()) {
+        std::cout << "File not found" << std::endl;
+        exit(-1);
+    }
 
-    // int testLabel;
-    // while(validateLabelsFile >> testLabel){
-        // validateLabels.push_back(new int(testLabel));
-    // }
-	// validateLabelsFile.close(); 
+    int testLabel;
+    while(validateLabelsFile >> testLabel){
+        validateLabels.push_back(new int(testLabel));
+    }
+	validateLabelsFile.close(); 
 
-	// /* - Mapping the expected output data to the output data container */
-	// for(int i = 0; i < 10; i++){
-		// for(int j = 0; j < 10; j++){
-			// if(i == j){
-				// targetOutputs[i][0].coeffRef(0, j) = 1.0f;
-			// }
-			// else {
-				// targetOutputs[i][0].coeffRef(0, j) = 0.0f;
-			// }
-		// }
-	// }
+	/* - Mapping the expected output data to the output data container */
+	for(int i = 0; i < 10; i++){
+		for(int j = 0; j < 10; j++){
+			if(i == j){
+				targetOutputs[i][0].coeffRef(0, j) = 1.0f;
+			}
+			else {
+				targetOutputs[i][0].coeffRef(0, j) = 0.0f;
+			}
+		}
+	}
 
+	std::vector<LayerConfig *> config;
+	FlattenConfig config_4;
+	config_4.layerType	= "flatten";
+	config_4.inputHeight = 28;
+	config_4.inputWidth = 28;
+	config_4.inputDepth = 1;
+
+	DenseConfig config_5;
+	config_5.layerType = "dense";
+	config_5.inputWidth = 784;
+	config_5.outputWidth = 32;
+	config_5.actFun = Sigmoid;
+	config_5.dactFun = dSigmoid;
+	config_5.learningRate = learningRate;
+
+	DenseConfig config_6;
+	config_6.layerType = "dense";
+	config_6.inputWidth = 32;
+	config_6.outputWidth = 10;
+	config_6.actFun = Sigmoid;
+	config_6.dactFun = dSigmoid;
+	config_6.learningRate = learningRate;
+
+	DenseConfig config_7;
+	config_7.layerType = "softmax";
+	config_7.inputWidth = 10;
+	config_7.outputWidth = 10;
+	
+	// config.push_back(&config_0);
+	// config.push_back(&config_1);
+	// config.push_back(&config_2);
+	// config.push_back(&config_3);
+	config.push_back(&config_4);
+	config.push_back(&config_5);
+	config.push_back(&config_6);
+	config.push_back(&config_7);
+
+	ConvolutionalNeuralNetwork cnn(config);
+
+	/* - Training with loaded data */
+	std::cout << std::fixed << std::setprecision(2);
+	for(int i = 0; i < epoch; i++){
+		/* Train and validate after each batch*/
+        loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
+		Scalar MSE = cnn.train(input_data, output_data, batchSize);
+		cleanDataBuffer(input_data);
+		cleanLabelBuffer(output_data);
+		loadTestData(input_data, output_data, targetOutputs, validateLabels, TEST);
+		Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TEST);
+		cleanDataBuffer(input_data);
+		cleanLabelBuffer(output_data);
+
+	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
+		// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
+	}
+	std::cout << std::endl;
+	// int epoch = atoi(argv[1]);
+	// std::vector<std::vector<Matrix *>> input_set;
+	// input_set.push_back(std::vector<Matrix *>());
+	// input_set.push_back(std::vector<Matrix *>());
+	// input_set.push_back(std::vector<Matrix *>());
+	// input_set.push_back(std::vector<Matrix *>());
+
+	// input_set[0].push_back(new Matrix(1, 2));
+	// input_set[1].push_back(new Matrix(1, 2));
+	// input_set[2].push_back(new Matrix(1, 2));
+	// input_set[3].push_back(new Matrix(1, 2));
+
+	// *input_set[0][0] << 0, 0;
+	// *input_set[1][0] << 0, 1;
+	// *input_set[2][0] << 1, 0;
+	// *input_set[3][0] << 1, 1;
+
+	// std::vector<std::vector<Matrix *>> output_set;
+	// output_set.push_back(std::vector<Matrix *>());
+	// output_set.push_back(std::vector<Matrix *>());
+	// output_set.push_back(std::vector<Matrix *>());
+	// output_set.push_back(std::vector<Matrix *>());
+
+	// output_set[0].push_back(new Matrix(1, 1));
+	// output_set[1].push_back(new Matrix(1, 1));
+	// output_set[2].push_back(new Matrix(1, 1));
+	// output_set[3].push_back(new Matrix(1, 1));
+
+	// *output_set[0][0] << 0;
+	// *output_set[1][0] << 1;
+	// *output_set[2][0] << 1;
+	// *output_set[3][0] << 0;
+
+	// for(int i = 0; i < 4; i++);
+
+	// DenseConfig config_in;
+	// config_in.layerType = "dense";
+	// config_in.inputWidth = 2;
+	// config_in.outputWidth = 3;
+	// config_in.actFun = ReLU;
+	// config_in.dactFun = dReLU;
+	// config_in.learningRate = 0.01;
+
+	// DenseConfig config_0;
+	// config_0.layerType = "dense";
+	// config_0.inputWidth = 3;
+	// config_0.outputWidth = 2;
+	// config_0.actFun = ReLU;
+	// config_0.dactFun = dReLU;
+	// config_0.learningRate = 0.01;
+
+	// DenseConfig config_out;
+	// config_out.layerType = "dense";
+	// config_out.inputWidth = 2;
+	// config_out.outputWidth = 1;
+	// config_out.actFun = ReLU;
+	// config_out.dactFun = dReLU;
+	// config_out.learningRate = 0.01;
+	
 	// std::vector<LayerConfig *> config;
-	// FlattenConfig config_4;
-	// config_4.layerType	= "flatten";
-	// config_4.inputHeight = 28;
-	// config_4.inputWidth = 28;
-	// config_4.inputDepth = 1;
+	// config.push_back(&config_in);
+	// config.push_back(&config_0);
+	// config.push_back(&config_out);
 
-	// DenseConfig config_5;
-	// config_5.layerType = "dense";
-	// config_5.inputWidth = 784;
-	// config_5.outputWidth = 32;
-	// config_5.actFun = Sigmoid;
-	// config_5.dactFun = dSigmoid;
-	// config_5.learningRate = learningRate;
+	// ConvolutionalNeuralNetwork nn(config);
 
-	// DenseConfig config_6;
-	// config_6.layerType = "dense";
-	// config_6.inputWidth = 32;
-	// config_6.outputWidth = 10;
-	// config_6.actFun = Sigmoid;
-	// config_6.dactFun = dSigmoid;
-	// config_6.learningRate = learningRate;
-
-	// DenseConfig config_7;
-	// config_7.layerType = "softmax";
-	// config_7.inputWidth = 10;
-	// config_7.outputWidth = 10;
-	
-	// // config.push_back(&config_0);
-	// // config.push_back(&config_1);
-	// // config.push_back(&config_2);
-	// // config.push_back(&config_3);
-	// config.push_back(&config_4);
-	// config.push_back(&config_5);
-	// config.push_back(&config_6);
-	// config.push_back(&config_7);
-
-	// ConvolutionalNeuralNetwork cnn(config);
-
-	// /* - Training with loaded data */
-	// std::cout << std::fixed << std::setprecision(2);
-	// for(int i = 0; i < epoch; i++){
-		// /* Train and validate after each batch*/
-        // loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
-		// Scalar MSE = cnn.train(input_data, output_data, batchSize);
-		// cleanDataBuffer(input_data);
-		// cleanLabelBuffer(output_data);
-		// loadTestData(input_data, output_data, targetOutputs, validateLabels, TEST);
-		// Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TEST);
-		// cleanDataBuffer(input_data);
-		// cleanLabelBuffer(output_data);
-
-	 	// std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
-		// // std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
+	// for(int i = 0; i < epoch; i++) {
+	// 	nn.train(input_set, output_set, 4);
 	// }
-	// std::cout << std::endl;
-	SoftmaxConfig config;
-	config.inputWidth = 4;
-	config.outputWidth = 4;
-	
-	SoftmaxLayer layer(&config);
-	std::vector<Matrix *> input;
-	Matrix * in = new Matrix(1,4);
-	*in << 0,1,1,1;
-	input.push_back(in);
-	
-	std::vector<Matrix *> output;
-	Matrix * out = new Matrix(1,4);
-	*out << 0,1,0,0;
-	output.push_back(out);
-	
-	layer.propagateForward(&input);
-	std::cout << "Predicted output" << std::endl;
-	std::cout << *layer.outputRef().back() << std::endl;
-	layer.propagateBackward(&output);
-	std::cout << "Gradient" << std::endl;
-	std::cout << *output.back() << std::endl;
-	
-	delete in;
-	delete out;
+
+	// for(size_t i = 0; i < input_set.size(); i++) {
+	// 	std::cout << "Input data " << *input_set[i][0] << ", ";
+	// 	nn.propagateForward(input_set[i]);
+	// 	for(size_t i = 0; i < nn.outputRef().size(); i++){
+	// 		std::cout << "Output layer " << i << ": ";
+	// 		std::cout << *nn.outputRef()[i] << std::endl;
+	// 	}
+	// }
+
+	// while(input_set.size() != 0) {
+	// 	while(input_set.back().size() != 0){
+	// 		delete input_set.back().back();
+	// 		input_set.back().pop_back();
+	// 	}
+	// 	input_set.pop_back();
+	// }
+
+	// while(output_set.size() != 0) {
+	// 	while(output_set.back().size() != 0){
+	// 		delete output_set.back().back();
+	// 		output_set.back().pop_back();
+	// 	}
+	// 	output_set.pop_back();
+	// }
 	return 0;
 }
 #endif

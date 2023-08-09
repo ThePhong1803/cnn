@@ -16,6 +16,12 @@ class Layer {
 	virtual std::vector<Matrix*> &outputRef() = 0;  // access to layer output vector
 	virtual std::vector<Matrix*> &inputRef() = 0;	// access to layer input vector
 };
+/* Perpare Layer class prototype for dependencies */
+
+class ConvolutionalLayer;
+class DenseLayer;
+class MaxPoolingLayer;
+class FlattenLayer;
 
 /* An interface for differnt type of layer configuration in network */
 class LayerConfig {
