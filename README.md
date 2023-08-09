@@ -13,8 +13,8 @@ Training RMSE, Validate RMSE and accuracy over epoch (learning rate = 0.1, epoch
 
 # Update with convolutional layer
 - Divide the neural network into several layer and implement it separately
-- Implemented layers: convolutional layer, max pooling layer, flatten layer
-- Comming soon: Dense layer, Average pooling layer, Softmax layer,...
+- Implemented layers: convolutional layer, max pooling layer, flatten layer, Dense layer
+- Comming soon: SDG optimizer, momentum, etc
 
 # Reference materials
 https://www.geeksforgeeks.org/ml-neural-network-implementation-in-c-from-scratch/
