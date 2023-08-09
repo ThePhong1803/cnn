@@ -363,8 +363,6 @@ int main(int argc, char ** argv){
 		}
 	}
 
-	SGD optimizer;
-
 	std::vector<LayerConfig *> config;
 	FlattenConfig config_4;
 	config_4.layerType	= "flatten";
@@ -375,22 +373,22 @@ int main(int argc, char ** argv){
 	DenseConfig config_5;
 	config_5.layerType = "dense";
 	config_5.inputWidth = 784;
-	config_5.outputWidth = 32;
-	config_5.actFun = Sigmoid;
-	config_5.dactFun = dSigmoid;
-	config_5.opt = &optimizer;
+	config_5.outputWidth = 128;
+	config_5.actFun = ReLU;
+	config_5.dactFun = dReLU;
+	config_5.opt = new SGD;
 	config_5.learningRate = learningRate;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
-	config_6.inputWidth = 32;
+	config_6.inputWidth = 128;
 	config_6.outputWidth = 10;
 	config_6.actFun = Sigmoid;
 	config_6.dactFun = dSigmoid;
-	config_6.opt = &optimizer;
+	config_6.opt = new SGD;
 	config_6.learningRate = learningRate;
 
-	DenseConfig config_7;
+	SoftmaxConfig config_7;
 	config_7.layerType = "softmax";
 	config_7.inputWidth = 10;
 	config_7.outputWidth = 10;
@@ -419,6 +417,9 @@ int main(int argc, char ** argv){
 		// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
 	}
 	std::cout << std::endl;
+	while(config.size() != 0){
+		config.pop_back();
+	}
 	cleanDataBuffer(input_data);
 	cleanLabelBuffer(output_data);
 	cleanDataBuffer(input_test);

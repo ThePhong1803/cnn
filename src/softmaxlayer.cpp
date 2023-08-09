@@ -71,25 +71,25 @@ void SoftmaxLayer::propagateForward(std::vector<Matrix *> * input)
 void SoftmaxLayer::propagateBackward(std::vector<Matrix *> * errors)
 {
     /* TESTING WITH DO NOTHING */
-    // // check erros vector size
-    // assert(errors -> size() == 1 && output.size() == 1);
-    // // calcualte error signal
-    // Matrix delta(1, config -> outputWidth);
-    // delta = (*errors -> back());                             
+    // check erros vector size
+    assert(errors -> size() == 1 && output.size() == 1);
+    // calcualte error signal
+    Matrix delta(1, config -> outputWidth);
+    delta = (*errors -> back());                             
     
-    // // prepare error for prev layer
-    // // clear error matrix:
-    // while(errors -> size() != 0) {
-    //     delete errors -> back();
-    //     errors -> pop_back();
-    // }
+    // prepare error for prev layer
+    // clear error matrix:
+    while(errors -> size() != 0) {
+        delete errors -> back();
+        errors -> pop_back();
+    }
 
-    // // create conainter for prev layer matrix
-    // errors -> push_back(new Matrix(1, config -> outputWidth));
+    // create conainter for prev layer matrix
+    errors -> push_back(new Matrix(1, config -> outputWidth));
 
-    // // create M matrix which have outputwidh duplicate of output vector
-    // Matrix temp(config -> outputWidth, config -> outputWidth);
-    // temp = (output.back() -> transpose().rowwise()).replicate(config -> outputWidth);
-    // temp = Matrix(((*this -> Identity) - temp.transpose()).array() * temp.array());
-	// (*errors -> back()) = delta * temp;
+    // create M matrix which have outputwidh duplicate of output vector
+    Matrix temp(config -> outputWidth, config -> outputWidth);
+    temp = (output.back() -> transpose().rowwise()).replicate(config -> outputWidth);
+    temp = Matrix(((*this -> Identity) - temp.transpose()).array() * temp.array());
+	(*errors -> back()) = delta * temp;
 }

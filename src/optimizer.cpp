@@ -26,6 +26,7 @@ SGD::SGD() : Optimizer()
 {
     // do nothing
 }
+
 SGD::~SGD() {
     // do nothing
 };

@@ -9,6 +9,7 @@ DenseConfig::DenseConfig()
 DenseConfig::~DenseConfig()
 {
     // Delete optimizer object
+    delete this -> opt;
 }
 
 // DenseConfig method for base class
