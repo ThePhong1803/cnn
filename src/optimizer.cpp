@@ -12,9 +12,11 @@ void Optimizer::ConvOptimizer(ConvolutionalLayer * layer)
 }
 
 /* SDG method implementation */
+/* These function should be call when the layer in network perform weights and biases update after one batch*/
 void SDG::DenseOptimizer(DenseLayer * layer)
 {
     // TODO: Implement SGD Optimization for Dense Layer
+
 }
 void SDG::ConvOptimizer(ConvolutionalLayer * layer)
 {
