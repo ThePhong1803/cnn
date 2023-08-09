@@ -86,6 +86,12 @@ void ConvolutionalNeuralNetwork::propagateBackward(std::vector<Matrix*> errors)
 	}
 }
 
+void ConvolutionalNeuralNetwork::updateNetwork(int batchSize) {
+	for(size_t i = 0; i < layer.size(); i++){
+		layer[i] -> updateWeightsAndBiases(batchSize);
+	}
+}
+
 // training and validate implementation
 Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> input,
 										 std::vector<std::vector<Matrix *>> output,
@@ -99,23 +105,31 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 	}
 	// using random engine to shuffle the dataset
 	std::shuffle(std::begin(dataset), std::end(dataset), rng);
-	// loop through all element in batches and train the network, after that we calculate the error
+	// Divide the input data set to batch with size of (dataset_size / batch)
+	// in 1 epoch, we loop throught all batches which assamble the entire dataset
+	size_t stIdx = 0;
 	Scalar loss = 0;
-	for(int n = 0; n < batchSize; n++)
+	for(; stIdx < dataset.size(); stIdx += batchSize)
 	{
-		// propagate forward train data
-		this -> propagateForward(*dataset[n].first);
-		// calculate error matrix
-		std::vector<Matrix *> errors = dMeanSquareError(&layer.back() -> outputRef(), dataset[n].second);
+		/* Loop throught all element in a batch */
+		for(int n = 0; n < batchSize && stIdx + n < dataset.size(); n++)
+		{
+			// propagate forward train data
+			this -> propagateForward(*dataset[stIdx + n].first);
+			// calculate error matrix
+			std::vector<Matrix *> errors = dMeanSquareError(&layer.back() -> outputRef(), dataset[stIdx + n].second);
 
-		for(size_t i = 0; i < errors.size(); i++){
-			std::cout << "Error Vector: " << *errors[i] << std::endl;
+			// for(size_t i = 0; i < errors.size(); i++){
+			// 	std::cout << "Error Vector: " << *errors[i] << std::endl;
+			// }
+			loss += BinaryCrossEntropy(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
+			this -> propagateBackward(errors);
 		}
-		loss += BinaryCrossEntropy(layer.back() -> outputRef().back(), dataset[n].second -> back());
-		this -> propagateBackward(errors);
-		// std::cout << "\rTrain process: " << float(n + 1) / batchSize;
+		// update start idx
+		this -> updateNetwork(batchSize);
+		std::cout << "\rTrain process: " << float(stIdx) / dataset.size();
 	}
-	return loss / batchSize;
+	return loss / dataset.size();
 }
 
 Scalar ConvolutionalNeuralNetwork::validate(std::vector<std::vector<Matrix *>> input,

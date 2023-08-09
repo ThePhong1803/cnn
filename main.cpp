@@ -5,7 +5,6 @@
 
 #define DATASIZE 60000
 #define TESTSIZE 10000
-#define TEST 	 TESTSIZE - 1
 #define TESTING
 
 Scalar linear(Scalar x) { return x; }
@@ -19,22 +18,23 @@ void loadDataset(   std::vector<std::vector<Matrix *>> &input_data,             
                 )
 {
     /* - Loading image data into data container */
-	int stIdx = rand() % (DATASIZE - datasize);
 	char buff[128];
 	for(int n = 0; n < datasize; n++){
 		try{
-			sprintf(buff, "dataset/training_dataset/%05d.bmp", stIdx + n + 1);
+			sprintf(buff, "dataset/training_dataset/%05d.bmp", n + 1);
 			ImageData img(buff);
 			Matrix * tmp = new Matrix(img.height, img.width);
 			img.getPixelMatrix(tmp);
 			input_data.push_back(std::vector<Matrix *>());
 			output_data.push_back(std::vector<Matrix *>());
 			input_data.back().push_back(tmp);
-			output_data.back().push_back(&targetOutputs[*labelVec[stIdx + n]].back());
+			output_data.back().push_back(&targetOutputs[*labelVec[n]].back());
+			std::cout << "\rLoading train dataset: " << float(n + 1) / datasize;
 		} catch (std::exception &e) {
 			std::cout << e.what() << std::endl;
 		}
 	}
+	std::cout << std::endl;
 }
 
 void loadTestData(  std::vector<std::vector<Matrix *>> &input_data,             // input data
@@ -45,22 +45,23 @@ void loadTestData(  std::vector<std::vector<Matrix *>> &input_data,             
                 )
 {
     /* - Loading image data into data container */
-	int stIdx = rand() % (TESTSIZE - datasize);
 	char buff[128];
 	for(int n = 0; n < datasize; n++){
 		try{
-			sprintf(buff, "dataset/test_dataset/%05d.bmp", stIdx + n + 1);
+			sprintf(buff, "dataset/test_dataset/%05d.bmp", n + 1);
 			ImageData img(buff);
 			Matrix * tmp = new Matrix(img.height, img.width);
 			img.getPixelMatrix(tmp);
 			input_data.push_back(std::vector<Matrix *>());
 			output_data.push_back(std::vector<Matrix *>());
 			input_data.back().push_back(tmp);
-			output_data.back().push_back(&targetOutputs[*labelVec[stIdx + n]].back());
+			output_data.back().push_back(&targetOutputs[*labelVec[n]].back());
+			std::cout << "\rLoading test dataset: " << float(n + 1) / datasize;
 		} catch (std::exception &e) {
 			std::cout << e.what() << std::endl;
 		}
 	}
+	std::cout << std::endl;
 }
 
 void cleanDataBuffer(std::vector<std::vector<Matrix *>> &input_data) {
@@ -317,6 +318,8 @@ int main(int argc, char ** argv){
 	/* - Fist is setup input data containter, then the expected output data container */
 	std::vector<std::vector<Matrix *>> input_data;
 	std::vector<std::vector<Matrix *>> output_data;
+	std::vector<std::vector<Matrix *>> input_test;
+	std::vector<std::vector<Matrix *>> output_test;
 	std::vector<std::vector<Matrix>>   targetOutputs(10, std::vector<Matrix>(1, Matrix(1, 10))); 
 	
     /* - Create labeled array for mapping */
@@ -360,6 +363,8 @@ int main(int argc, char ** argv){
 		}
 	}
 
+	SGD optimizer;
+
 	std::vector<LayerConfig *> config;
 	FlattenConfig config_4;
 	config_4.layerType	= "flatten";
@@ -373,6 +378,7 @@ int main(int argc, char ** argv){
 	config_5.outputWidth = 32;
 	config_5.actFun = Sigmoid;
 	config_5.dactFun = dSigmoid;
+	config_5.opt = &optimizer;
 	config_5.learningRate = learningRate;
 
 	DenseConfig config_6;
@@ -381,6 +387,7 @@ int main(int argc, char ** argv){
 	config_6.outputWidth = 10;
 	config_6.actFun = Sigmoid;
 	config_6.dactFun = dSigmoid;
+	config_6.opt = &optimizer;
 	config_6.learningRate = learningRate;
 
 	DenseConfig config_7;
@@ -395,27 +402,27 @@ int main(int argc, char ** argv){
 	config.push_back(&config_4);
 	config.push_back(&config_5);
 	config.push_back(&config_6);
-	config.push_back(&config_7);
+	// config.push_back(&config_7);
 
 	ConvolutionalNeuralNetwork cnn(config);
 
 	/* - Training with loaded data */
-	std::cout << std::fixed << std::setprecision(2);
+	std::cout << std::fixed << std::setprecision(4);
+	loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
+	loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
 	for(int i = 0; i < epoch; i++){
 		/* Train and validate after each batch*/
-        loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
 		Scalar MSE = cnn.train(input_data, output_data, batchSize);
-		cleanDataBuffer(input_data);
-		cleanLabelBuffer(output_data);
-		loadTestData(input_data, output_data, targetOutputs, validateLabels, TEST);
-		Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TEST);
-		cleanDataBuffer(input_data);
-		cleanLabelBuffer(output_data);
+		Scalar ACC = cnn.validate(input_test, output_test, outputToLabelIdx, TESTSIZE);
 
 	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
 		// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
 	}
 	std::cout << std::endl;
+	cleanDataBuffer(input_data);
+	cleanLabelBuffer(output_data);
+	cleanDataBuffer(input_test);
+	cleanLabelBuffer(output_test);
 	// int epoch = atoi(argv[1]);
 	// std::vector<std::vector<Matrix *>> input_set;
 	// input_set.push_back(std::vector<Matrix *>());

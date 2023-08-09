@@ -8,7 +8,7 @@ DenseConfig::DenseConfig()
 
 DenseConfig::~DenseConfig()
 {
-    // Do nothing
+    // Delete optimizer object
 }
 
 // DenseConfig method for base class
@@ -36,12 +36,16 @@ DenseLayer::DenseLayer(DenseConfig * _config) : config(_config)
 {
     this -> weight = new Matrix(config -> inputWidth, config -> outputWidth);
     this -> biases = new Matrix(1, config -> outputWidth);
+    this -> dweight = new Matrix(config -> inputWidth, config -> outputWidth);
+    this -> dbiases = new Matrix(1, config -> outputWidth);
     this -> output.push_back(new Matrix(1, config -> outputWidth));
     this -> caches.push_back(new Matrix(1, config -> outputWidth));
 
     // init weight and biases
     this -> biases -> setZero();
     this -> weight -> setRandom();
+    this -> dbiases -> setZero();
+    this -> dweight -> setZero();
     this -> output.back() -> setZero();
     this -> caches.back() -> setZero();
 }
@@ -50,6 +54,8 @@ DenseLayer::~DenseLayer()
 {
     delete this -> weight;
     delete this -> biases;
+    delete this -> dweight;
+    delete this -> dbiases;
     while(output.size() != 0)
     {
         delete output.back();
@@ -91,9 +97,16 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     Matrix delta = Matrix((errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
     // prepare error for prev layer
     (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
-    // (*errors -> back()) = delta * (weight -> transpose());
+    //(*errors -> back()) = delta * (weight -> transpose());
 
     // update weight and bias, we will optimize this with mini-batches
-    (*weight) += config -> learningRate * (input.back() -> transpose() * delta);
-    (*biases) += config -> learningRate * delta;
+    (*dweight) += config -> learningRate * (input.back() -> transpose() * delta);
+    (*dbiases) += config -> learningRate * delta;
+}
+
+void DenseLayer::updateWeightsAndBiases(int batch_size) 
+{
+    /* Usually call function from optimier */
+    // for testing we gonnal do it here
+    config -> opt -> DenseOptimizer(this, batch_size);
 }

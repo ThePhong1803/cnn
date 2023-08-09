@@ -4,6 +4,7 @@
 #include <common.h>
 #include <interface.h>
 #include <activation.h>
+#include <optimizer.h>
 
 // dense layer configuration class
 class DenseConfig : public LayerConfig
@@ -17,6 +18,7 @@ class DenseConfig : public LayerConfig
     Scalar learningRate;
 	ScalarFunPtr actFun;
 	ScalarFunPtr dactFun;
+    Optimizer * opt;
 
     DenseConfig();
     ~DenseConfig();
@@ -35,6 +37,8 @@ class DenseLayer : public Layer
     DenseConfig *         config;  // layer configuration attribute
     Matrix *              weight;  // weight matrix for this layer
     Matrix *              biases;  // bias matrix for this layer
+    Matrix *              dweight; // weight matrix for this layer
+    Matrix *              dbiases; // bias matrix for this layer
     std::vector<Matrix *> input;
     std::vector<Matrix *> caches;
     std::vector<Matrix *> output; // output of this layer, used vector but actually only have 1 element for compability with prev layer
@@ -45,6 +49,7 @@ class DenseLayer : public Layer
     // main method for this layer
     void propagateForward(std::vector<Matrix *> * input) override;
     void propagateBackward(std::vector<Matrix *> * errors) override;
+    void updateWeightsAndBiases(int batch_size) override;
 
     // io access method
     std::vector<Matrix *> &inputRef() override;

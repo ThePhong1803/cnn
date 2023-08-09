@@ -25,6 +25,11 @@ LayerConfig::~LayerConfig()
 	// Do nothing, this is virtual destructor so let derive class destructor do the work
 }
 
+void Layer::updateWeightsAndBiases(int batch_size)
+{
+	// Do nothing
+}
+
 uint32_t &LayerConfig::inputHeightRef()
 {
 	throw DisableMethod("inputHeightRef");

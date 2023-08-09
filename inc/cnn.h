@@ -30,6 +30,9 @@ class ConvolutionalNeuralNetwork
 
 	// this function perform feed backward for hidden layer in network
 	void propagateBackward(std::vector<Matrix*> errors);
+
+	// this function perform update network weights and biases
+	void updateNetwork(int batchSize);
 	// train and validate neural network
 	// train method perform training on network and return the mse value mini batches
 	// validate method perform validating on network and return the accuracy of the network

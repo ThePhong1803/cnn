@@ -3,20 +3,18 @@
 
 #include <common.h>
 #include <interface.h>
-
-/* Base class prototype declaration */
-class Optimizer 
-{
-    public:
-    virtual void DenseOptimizer(DenseLayer * layer);
-    virtual void ConvOptimizer(ConvolutionalLayer * layer);
-};
+#include <denselayer.h>
+#include <convolutionallayer.h>
 
 /* Stochastic Gradient Descent Implementation */
-class SDG : public Optimizer 
+class SGD : public Optimizer 
 {
-    void DenseOptimizer(DenseLayer * layer) override;
-    void ConvOptimizer(ConvolutionalLayer * layer) override;
+    Scalar momentum;
+    public:
+    SGD();
+    ~SGD();
+    void DenseOptimizer(DenseLayer * layer, int batch_size) override;
+    void ConvOptimizer(ConvolutionalLayer * layer, int batch_size) override;
 };
 
 

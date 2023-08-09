@@ -11,17 +11,28 @@ class Layer {
 	// share methoid between layer classes
 	virtual void propagateForward(std::vector<Matrix*> * input) = 0;
 	virtual void propagateBackward(std::vector<Matrix*> * errors) = 0;
+	virtual void updateWeightsAndBiases(int batch_size);
 	
 	// element access in derive classes
 	virtual std::vector<Matrix*> &outputRef() = 0;  // access to layer output vector
 	virtual std::vector<Matrix*> &inputRef() = 0;	// access to layer input vector
 };
-/* Perpare Layer class prototype for dependencies */
 
+/* Layer Derive Class Declaration for other class to reference */
 class ConvolutionalLayer;
 class DenseLayer;
-class MaxPoolingLayer;
 class FlattenLayer;
+class MaxPoolingLayer;
+
+/* Base class prototype declaration */
+class Optimizer 
+{
+    public:
+	Optimizer();
+    virtual ~Optimizer();
+    virtual void DenseOptimizer(DenseLayer * layer, int batch_size) = 0;
+    virtual void ConvOptimizer(ConvolutionalLayer * layer, int batch_size) = 0;
+};
 
 /* An interface for differnt type of layer configuration in network */
 class LayerConfig {
