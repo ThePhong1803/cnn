@@ -122,7 +122,7 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 			// for(size_t i = 0; i < errors.size(); i++){
 			// 	std::cout << "Error Vector: " << *errors[i] << std::endl;
 			// }
-			loss += BinaryCrossEntropy(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
+			loss += MeanSquareError(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
 			this -> propagateBackward(errors);
 		}
 		// update start idx

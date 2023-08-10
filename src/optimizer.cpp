@@ -1,31 +1,17 @@
 #include <optimizer.h>
 
-/* Base class */
-Optimizer::Optimizer()
-{
-    // Do nothing
-}
-
-Optimizer::~Optimizer()
-{
-    // Base class virutal destructor
-}
-
-/* Base class method is not callable */
-void Optimizer::DenseOptimizer(DenseLayer * layer, int batch_size)
-{
-    throw DisableMethod("DenseOptimizer");
-}
-void Optimizer::ConvOptimizer(ConvolutionalLayer * layer, int batch_size)
-{
-    throw DisableMethod("ConvOptimizer");
-}
-
 /* SDG method implementation */
-SGD::SGD() : Optimizer() 
+SGD::SGD()
 {
-    // do nothing
+	// default optimizer contructor
+	this -> learnRate 	= 0.01f;
+	this -> momentum 	= 0.90f;
 }
+
+SGD::SGD(Scalar _learnRate, Scalar _momentum) : Optimizer(), learnRate(_learnRate), momentum(_momentum)
+{
+    // disable nestorov
+}	
 
 SGD::~SGD() {
     // do nothing
@@ -34,8 +20,16 @@ SGD::~SGD() {
 void SGD::DenseOptimizer(DenseLayer * layer, int batch_size)
 {
     // TODO: Implement SGD Optimization for Dense Layer
-    *(layer -> weight) += (*(layer -> dweight) / Scalar(batch_size));
-    *(layer -> biases) += (*(layer -> dbiases) / Scalar(batch_size));
+    *(layer -> dweight) /= Scalar(batch_size);
+    *(layer -> dbiases) /= Scalar(batch_size);
+	
+	// calculate velocity
+	(*layer -> vweight) = momentum * (*layer -> vweight) + learnRate * (*layer -> dweight);
+	(*layer -> vbiases) = momentum * (*layer -> vbiases) + learnRate * (*layer -> dbiases);
+	
+	// weight update
+	(*layer -> weight) += (*layer -> vweight);
+	(*layer -> biases) += (*layer -> vbiases);
 
     // reset change in weights and biases
     layer -> dweight -> setZero();

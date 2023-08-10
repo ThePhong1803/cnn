@@ -30,6 +30,28 @@ void Layer::updateWeightsAndBiases(int batch_size)
 	// Do nothing
 }
 
+/* Optimizer interface class */
+/* Base class */
+Optimizer::Optimizer()
+{
+    // Do nothing
+}
+
+Optimizer::~Optimizer()
+{
+    // Base class virutal destructor
+}
+
+/* Base class method is not callable */
+void Optimizer::DenseOptimizer(DenseLayer * layer, int batch_size)
+{
+    throw DisableMethod("DenseOptimizer");
+}
+void Optimizer::ConvOptimizer(ConvolutionalLayer * layer, int batch_size)
+{
+    throw DisableMethod("ConvOptimizer");
+}
+
 uint32_t &LayerConfig::inputHeightRef()
 {
 	throw DisableMethod("inputHeightRef");

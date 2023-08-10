@@ -9,7 +9,6 @@ DenseConfig::DenseConfig()
 DenseConfig::~DenseConfig()
 {
     // Delete optimizer object
-    delete this -> opt;
 }
 
 // DenseConfig method for base class
@@ -39,6 +38,8 @@ DenseLayer::DenseLayer(DenseConfig * _config) : config(_config)
     this -> biases = new Matrix(1, config -> outputWidth);
     this -> dweight = new Matrix(config -> inputWidth, config -> outputWidth);
     this -> dbiases = new Matrix(1, config -> outputWidth);
+	this -> vweight = new Matrix(config -> inputWidth, config -> outputWidth);
+    this -> vbiases = new Matrix(1, config -> outputWidth);
     this -> output.push_back(new Matrix(1, config -> outputWidth));
     this -> caches.push_back(new Matrix(1, config -> outputWidth));
 
@@ -47,6 +48,8 @@ DenseLayer::DenseLayer(DenseConfig * _config) : config(_config)
     this -> weight -> setRandom();
     this -> dbiases -> setZero();
     this -> dweight -> setZero();
+	this -> vbiases -> setZero();
+    this -> vweight -> setZero();
     this -> output.back() -> setZero();
     this -> caches.back() -> setZero();
 }
@@ -57,6 +60,8 @@ DenseLayer::~DenseLayer()
     delete this -> biases;
     delete this -> dweight;
     delete this -> dbiases;
+	delete this -> vweight;
+    delete this -> vbiases;
     while(output.size() != 0)
     {
         delete output.back();
@@ -101,8 +106,8 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     //(*errors -> back()) = delta * (weight -> transpose());
 
     // update weight and bias, we will optimize this with mini-batches
-    (*dweight) += config -> learningRate * (input.back() -> transpose() * delta);
-    (*dbiases) += config -> learningRate * delta;
+    (*dweight) += (input.back() -> transpose() * delta);
+    (*dbiases) += delta;
 }
 
 void DenseLayer::updateWeightsAndBiases(int batch_size) 

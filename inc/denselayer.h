@@ -15,7 +15,6 @@ class DenseConfig : public LayerConfig
     uint32_t outputWidth;
 
     // layer activation function config
-    Scalar learningRate;
 	ScalarFunPtr actFun;
 	ScalarFunPtr dactFun;
     Optimizer * opt;
@@ -39,6 +38,8 @@ class DenseLayer : public Layer
     Matrix *              biases;  // bias matrix for this layer
     Matrix *              dweight; // weight matrix for this layer
     Matrix *              dbiases; // bias matrix for this layer
+	Matrix *              vweight; // weight matrix for this layer
+    Matrix *              vbiases; // bias matrix for this layer
     std::vector<Matrix *> input;
     std::vector<Matrix *> caches;
     std::vector<Matrix *> output; // output of this layer, used vector but actually only have 1 element for compability with prev layer
