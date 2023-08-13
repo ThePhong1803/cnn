@@ -192,12 +192,18 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 	{
 		// adding kernel layer container
 		kernel.push_back(std::vector<Matrix*>());
+		vkernel.push_back(std::vector<Matrix*>());
+		dkernel.push_back(std::vector<Matrix*>());
 		for(uint32_t j = 0; j < config -> inputDepth; j++)
 		{
 			// add new kernel matrix layer to current kernel
 			kernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
+			vkernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
+			dkernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
 			// init kernel with random value
 			kernel.back().back() -> setRandom();
+			vkernel.back().back() -> setZero();
+			dkernel.back().back() -> setZero();
 		}
 	}
 
@@ -208,11 +214,15 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 		output.push_back(new Matrix(R, C));
 		caches.push_back(new Matrix(R, C));
 		biases.push_back(new Matrix(R, C));
+		vbiases.push_back(new Matrix(R, C));
+		dbiases.push_back(new Matrix(R, C));
 		
 		// init output and bias with zero and random (zero for now)
 		output.back() -> setZero();
 		caches.back() -> setZero();
 		biases.back() -> setZero();
+		vbiases.back() -> setZero();
+		dbiases.back() -> setZero();
 	}
 }
 
@@ -226,21 +236,31 @@ ConvolutionalLayer::~ConvolutionalLayer(){
 		{
 			// delete kernel layer mem
 			delete kernel.back().back();
+			delete vkernel.back().back();
+			delete dkernel.back().back();
 			// delete entry in kernel layers vector
 			kernel.back().pop_back();
+			vkernel.back().pop_back();
+			dkernel.back().pop_back();
 		}
 		// delete kernel entry in kernel vector
 		kernel.pop_back();
+		vkernel.pop_back();
+		dkernel.pop_back();
 		
 		// delete output, caches and biases mem
 		delete output.back();
 		delete caches.back();
 		delete biases.back();
+		delete vbiases.back();
+		delete dbiases.back();
 		
 		// delete entry in output, caches and biases vectors
 		output.pop_back();
 		caches.pop_back();
 		biases.pop_back();
+		vbiases.pop_back();
+		dbiases.pop_back();
 	}
 }
 
@@ -310,9 +330,17 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 			// update errors vector for next layer
 			(*(*errors)[l]) += conv(delta[k], *kernel[k][l], config -> kernelHeight - config -> padding - 1, config -> striding);
 			// update kernel layer l with the calculated error
-			(*kernel[k][l]) += config -> learningRate * corr(*input[l], delta[k], config -> padding, config -> striding);
+			(*dkernel[k][l]) += corr(*input[l], delta[k], config -> padding, config -> striding);
 			// update biases matrix
-			(*biases[k]) += config -> learningRate * (delta[k]);
+			(*dbiases[k]) += (delta[k]);
 		}
 	}
+}
+
+// this function perform layer parameters update
+void ConvolutionalLayer::updateWeightsAndBiases(int batch_size)
+{
+	/* Usually call function from optimier */
+    // for testing we gonnal do it here
+    config -> opt -> ConvOptimizer(this, batch_size);
 }

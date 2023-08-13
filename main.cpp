@@ -308,9 +308,15 @@ int main(int argc, char ** argv)
 	
 int main(int argc, char ** argv){
 	srand(time(NULL));
-	float learningRate = atof(argv[1]);
-	int epoch		   = atoi(argv[2]);
-	int batchSize	   = atoi(argv[3]);
+	if(argc < 6) {
+		std::cout << "Using: out --learningRate --momentum --epoch --batch --decay-rate" << std::endl;
+		exit(-1);
+	}
+	Scalar learningRate = atof(argv[1]);
+	Scalar momentum     = atof(argv[2]);
+	int epoch		    = atoi(argv[3]);
+	int batchSize	    = atoi(argv[4]);
+	Scalar decay_rate	= atof(argv[5]);
 	std::cout << "Epoch: " << epoch << std::endl;
 	std::cout << "Batch size: " << batchSize << std::endl;
 
@@ -363,44 +369,69 @@ int main(int argc, char ** argv){
 		}
 	}
 
+	Optimizer * optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
+
+	std::cout << "Learning rate: " << optimizer -> getLearningRate() << std::endl;
+
 	std::vector<LayerConfig *> config;
+
+	ConvConfig config_0;
+	config_0.layerType	  = "conv";
+	config_0.inputHeight  = 28;
+	config_0.inputWidth   = 28;
+	config_0.inputDepth   = 1;
+	config_0.kernelHeight = 3;	// hyperparameter
+	config_0.kernelWidth  = 3;	// hyperparameter
+	config_0.numKernel    = 4;		// hyperparameter
+	config_0.padding      = 0;		// hyperparameter, usually zero
+	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
+	config_0.actFun		  = ReLU;
+	config_0.dactFun	  = dReLU;
+	config_0.opt 		  = optimizer;
+
+	PoolingConfig config_1;
+	config_1.layerType		= "maxpool";
+	config_1.inputHeight  	= 26;	
+	config_1.inputWidth   	= 26;	
+	config_1.inputDepth   	= 4;	// depend on previous hyperparameter
+	config_1.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
+	config_1.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
+
 	FlattenConfig config_4;
 	config_4.layerType	= "flatten";
-	config_4.inputHeight = 28;
-	config_4.inputWidth = 28;
-	config_4.inputDepth = 1;
+	config_4.inputHeight = 13;
+	config_4.inputWidth = 13;
+	config_4.inputDepth = 4;
 
 	DenseConfig config_5;
 	config_5.layerType = "dense";
-	config_5.inputWidth = 784;
-	config_5.outputWidth = 128;
+	config_5.inputWidth = 676;
+	config_5.outputWidth = 32;
 	config_5.actFun = ReLU;
 	config_5.dactFun = dReLU;
-	config_5.opt = new SGD;
-	config_5.learningRate = learningRate;
+	config_5.opt = optimizer;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
-	config_6.inputWidth = 128;
+	config_6.inputWidth = 32;
 	config_6.outputWidth = 10;
-	config_6.actFun = Sigmoid;
-	config_6.dactFun = dSigmoid;
-	config_6.opt = new SGD;
-	config_6.learningRate = learningRate;
+	config_6.actFun = linear;
+	config_6.dactFun = dlinear;
+	config_6.opt = optimizer;
 
-	SoftmaxConfig config_7;
+	DenseConfig config_7;
 	config_7.layerType = "softmax";
 	config_7.inputWidth = 10;
 	config_7.outputWidth = 10;
 	
-	// config.push_back(&config_0);
-	// config.push_back(&config_1);
+	config.push_back(&config_0);
+	config.push_back(&config_1);
 	// config.push_back(&config_2);
 	// config.push_back(&config_3);
 	config.push_back(&config_4);
 	config.push_back(&config_5);
 	config.push_back(&config_6);
-	// config.push_back(&config_7);
+	config.push_back(&config_7);
 
 	ConvolutionalNeuralNetwork cnn(config);
 
@@ -408,15 +439,21 @@ int main(int argc, char ** argv){
 	std::cout << std::fixed << std::setprecision(4);
 	loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
 	loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
+	std::ofstream log("./log/RMSE.txt");
+	log << "LOSS" << " " << "ACC" << '\n';
 	for(int i = 0; i < epoch; i++){
 		/* Train and validate after each batch*/
-		Scalar MSE = cnn.train(input_data, output_data, batchSize);
+		Scalar LOSS = cnn.train(input_data, output_data, batchSize);
 		Scalar ACC = cnn.validate(input_test, output_test, outputToLabelIdx, TESTSIZE);
 
-	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " MSE: " << MSE << std::endl;
-		// std::cout << "\rEpoch : " << i + 1 << " MSE: " << MSE << std::endl;
+		// update leanring rate
+
+	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " Lr: " << optimizer -> getLearningRate() << " LOSS: " << LOSS << std::endl;
+		optimizer -> ScheduleLearningRate(Scalar(i + 1));
+		log << LOSS << " " << ACC << '\n';
 	}
 	std::cout << std::endl;
+	log.close();
 	while(config.size() != 0){
 		config.pop_back();
 	}
@@ -424,6 +461,32 @@ int main(int argc, char ** argv){
 	cleanLabelBuffer(output_data);
 	cleanDataBuffer(input_test);
 	cleanLabelBuffer(output_test);
+	delete optimizer;
+	std::string cmd = "";
+	std::cout << "Command$ ";
+	getline(std::cin, cmd);
+	std::cout << std::endl;
+	while(cmd != "exit"){
+		// get test sample
+		Image img("test-img/test.bmp", -1);		// open image for diesplay
+		ImageData obj("test-img/test.bmp");		// open image for extract data
+        img.setInvert(false);
+
+		Matrix testData(img.getHeight(), img.getWidth()); 	// input data storage
+		obj.getPixelMatrix(&testData);						// load pixel data into testing input matrix
+		std::vector<Matrix *> test;							// create vector containter for input matrix
+		test.push_back(&testData);							
+		cnn.propagateForward(test);							// propagate forward testing input matrix vector
+		img.testing();										// display test sample
+		
+		int num = outputToLabelIdx(cnn.layer.back() -> outputRef().back());
+		std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn.layer.back() -> outputRef().back() -> coeff(num) << std::endl;
+		std::cout << "Output vector: " << *cnn.layer.back() -> outputRef().back() << std::endl;
+		std::cout << "Command$ ";
+		getline(std::cin, cmd);
+		std::cout << std::endl;
+	}
+
 	// int epoch = atoi(argv[1]);
 	// std::vector<std::vector<Matrix *>> input_set;
 	// input_set.push_back(std::vector<Matrix *>());
@@ -518,6 +581,8 @@ int main(int argc, char ** argv){
 	// 	}
 	// 	output_set.pop_back();
 	// }
+
+	// softmax test => pass
 	return 0;
 }
 #endif

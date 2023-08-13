@@ -32,6 +32,19 @@ class Optimizer
     virtual ~Optimizer();
     virtual void DenseOptimizer(DenseLayer * layer, int batch_size) = 0;
     virtual void ConvOptimizer(ConvolutionalLayer * layer, int batch_size) = 0;
+	virtual void ScheduleLearningRate(Scalar step) = 0;
+	virtual Scalar getLearningRate() = 0;
+};
+
+class LearningRateScheduler {
+	public:
+    Scalar lr;
+    LearningRateScheduler();
+	LearningRateScheduler(Scalar _lr);
+    virtual ~LearningRateScheduler();
+
+	Scalar getLearningRate();
+	virtual void updateLearningRate(Scalar step);
 };
 
 /* An interface for differnt type of layer configuration in network */

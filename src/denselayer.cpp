@@ -102,8 +102,8 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     // calcualte error signal
     Matrix delta = Matrix((errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
     // prepare error for prev layer
-    (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
-    //(*errors -> back()) = delta * (weight -> transpose());
+    // (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
+    (*errors -> back()) = delta * (weight -> transpose());
 
     // update weight and bias, we will optimize this with mini-batches
     (*dweight) += (input.back() -> transpose() * delta);

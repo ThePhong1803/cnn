@@ -30,9 +30,8 @@ class ConvConfig : public LayerConfig{
 	// layer activation function config
 	ScalarFunPtr actFun;
 	ScalarFunPtr dactFun;
-
-	// define layer learning rate
-	Scalar learningRate;
+	Optimizer * opt;
+	
 	uint32_t &inputHeightRef();
 	uint32_t &inputWidthRef();
 	uint32_t &inputDepthRef();
@@ -52,6 +51,10 @@ class ConvolutionalLayer : public Layer {
 	std::vector<Matrix*> 				caches;			// store the value before activation
 	std::vector<std::vector<Matrix*>> 	kernel;			// kernel matrix container
     std::vector<Matrix*> 				biases;			// bias for the layer
+	std::vector<std::vector<Matrix*>> 	vkernel;		// kernel matrix container
+    std::vector<Matrix*> 				vbiases;		// bias for the layer
+	std::vector<std::vector<Matrix*>> 	dkernel;		// kernel matrix container
+    std::vector<Matrix*> 				dbiases;		// bias for the layer
 	std::vector<Matrix*> 				input;			// input of convolutional layer
 	
 	// layer constructor and destructor
@@ -65,7 +68,10 @@ class ConvolutionalLayer : public Layer {
     // this function perform network forward propagation
 	void propagateForward(std::vector<Matrix*> * input) override;
 	
-	// thsi frunction perform network backward propagateion
+	// thsi frunction perform layer backward propagateion
 	void propagateBackward(std::vector<Matrix*> * errors) override;
+
+	// this function perform layer update parameters
+	void updateWeightsAndBiases(int batch_size) override;
 };
 #endif

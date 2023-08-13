@@ -37,7 +37,7 @@ class ConvolutionalNeuralNetwork
 	// train method perform training on network and return the mse value mini batches
 	// validate method perform validating on network and return the accuracy of the network
 	Scalar train(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int batchSize);
-	Scalar validate(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *) ,int batchSize);
+	Scalar validate(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *), int batchSize);
 	
 	private:
 	void deleteNetwork();

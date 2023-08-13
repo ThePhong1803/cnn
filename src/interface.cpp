@@ -42,6 +42,31 @@ Optimizer::~Optimizer()
     // Base class virutal destructor
 }
 
+LearningRateScheduler::LearningRateScheduler()
+{
+	this -> lr = 0.01; // default value of learning rate base class
+}
+
+LearningRateScheduler::LearningRateScheduler(Scalar _lr)
+{
+	this -> lr = _lr; // default value of learning rate base class
+}
+
+LearningRateScheduler::~LearningRateScheduler()
+{
+	// Do nothing
+}
+
+Scalar LearningRateScheduler::getLearningRate()
+{
+	// return model current learning rate
+	return this -> lr;
+}
+
+void LearningRateScheduler::updateLearningRate(Scalar step)
+{
+	// Do nothing - overrided method
+}
 /* Base class method is not callable */
 void Optimizer::DenseOptimizer(DenseLayer * layer, int batch_size)
 {

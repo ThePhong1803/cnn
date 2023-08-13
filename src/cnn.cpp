@@ -119,14 +119,13 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 			// calculate error matrix
 			std::vector<Matrix *> errors = dMeanSquareError(&layer.back() -> outputRef(), dataset[stIdx + n].second);
 
-			// for(size_t i = 0; i < errors.size(); i++){
-			// 	std::cout << "Error Vector: " << *errors[i] << std::endl;
-			// }
-			loss += MeanSquareError(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
+			// calculate loss and propagate back
+			loss += CategoricalCrossEntropy(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
 			this -> propagateBackward(errors);
 		}
 		// update start idx
 		this -> updateNetwork(batchSize);
+		// schedule leanring rate
 		std::cout << "\rTrain process: " << float(stIdx) / dataset.size();
 	}
 	return loss / dataset.size();

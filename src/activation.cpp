@@ -17,13 +17,13 @@ Scalar dSigmoid(Scalar x)
 Scalar ReLU(Scalar x)
 {
 	// ReLU
-	return (x >= 0) ?  x : 0;
+	return (x >=0) ?  x : 0;
 }
 
 Scalar dReLU(Scalar x)
 {
 	// ReLU derivative
-	return (x >= 0) ?  1 : 0;
+	return (x > 0) ?  1 : 0;
 }
 
 Scalar LeakyReLU(Scalar x)
