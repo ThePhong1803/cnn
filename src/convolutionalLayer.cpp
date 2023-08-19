@@ -291,7 +291,7 @@ void ConvolutionalLayer::propagateForward(std::vector<Matrix *> * input) {
 		// adding biases to caches layer
 		(*caches[i]) += (*biases[i]);
 		// apply activation function in each output
-		(*output[i]) = caches[i] -> unaryExpr([this](Scalar x){return this -> config -> actFun(x);});
+		(*output[i]) = caches[i] -> unaryExpr(std::function(config -> actFun));
 	}
 }
 
@@ -303,7 +303,7 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 	for(size_t i = 0; i < delta.size(); i++)
 	{
 		// loop throught all errors layer calculate layer errors
-		Matrix d = Matrix(((*errors)[i] -> array()) * (caches[i] -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
+		Matrix d = Matrix(((*errors)[i] -> array()) * (caches[i] -> unaryExpr(std::function(config -> dactFun)).array()));
 		// Matrix d = *(*errors)[i];
 		delta[i] = d;	
 	}

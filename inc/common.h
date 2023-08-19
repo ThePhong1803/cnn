@@ -26,7 +26,6 @@ typedef float Scalar;
 typedef Eigen::MatrixXf Matrix;
 typedef Eigen::RowVectorXf RowVector;
 typedef Eigen::VectorXf ColVector;
-typedef uint32_t uint;
 typedef Scalar (*ScalarFunPtr)(Scalar);
 
 /* End typedef section */

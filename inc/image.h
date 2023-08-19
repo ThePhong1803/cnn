@@ -6,6 +6,7 @@
 #include <cmath>
 #include <string.h>
 #include <stdint.h>
+#include <common.h>
 #pragma once
 
 
@@ -53,9 +54,9 @@ class Image {
 	void getImageInfo();
 	void hexdump();
 	void testing();
-	float getFloatValue(int pixel);
+	Scalar getFloatValue(int pixel);
 	void setInvert(bool _invert) { this -> invert = _invert; }
-	std::vector<float> getPixelArray();
+	std::vector<Scalar> getPixelArray();
 	int convertGrayScale(int pixel);
 	int getWidth() { return this -> infoHeader.width; }
 	int getHeight() { return this -> infoHeader.height; }
@@ -88,5 +89,5 @@ class Image {
 	
 	public:
 	// static method for only extract image infomation only
-	static std::vector<float> extractPixelData(std::string path);
+	static std::vector<Scalar> extractPixelData(std::string path);
 };

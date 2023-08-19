@@ -9,7 +9,7 @@ ImageData::ImageData()
 }                                    
 
 // constructor with pixel vector
-ImageData::ImageData(std::vector<float> _pixels, int _number, int _id)
+ImageData::ImageData(std::vector<Scalar> _pixels, int _number, int _id)
 {
     this -> pixels = _pixels;
     this -> number = _number;

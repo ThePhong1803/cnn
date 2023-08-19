@@ -38,6 +38,9 @@ class ConvolutionalNeuralNetwork
 	// validate method perform validating on network and return the accuracy of the network
 	Scalar train(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int batchSize);
 	Scalar validate(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *), int batchSize);
+
+	// model summary: print out model structure
+	void summary();
 	
 	private:
 	void deleteNetwork();

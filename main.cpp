@@ -1,6 +1,5 @@
 #include <common.h>
 #include <imagedata.h>
-#include <neuralnetwork.h>
 #include <cnn.h>
 
 #define DATASIZE 60000
@@ -380,10 +379,10 @@ int main(int argc, char ** argv){
 	config_0.inputHeight  = 28;
 	config_0.inputWidth   = 28;
 	config_0.inputDepth   = 1;
-	config_0.kernelHeight = 3;	// hyperparameter
-	config_0.kernelWidth  = 3;	// hyperparameter
-	config_0.numKernel    = 4;		// hyperparameter
-	config_0.padding      = 0;		// hyperparameter, usually zero
+	config_0.kernelHeight = 5;	// hyperparameter
+	config_0.kernelWidth  = 5;	// hyperparameter
+	config_0.numKernel    = 6;		// hyperparameter
+	config_0.padding      = 2;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
 	config_0.actFun		  = ReLU;
 	config_0.dactFun	  = dReLU;
@@ -391,49 +390,81 @@ int main(int argc, char ** argv){
 
 	PoolingConfig config_1;
 	config_1.layerType		= "maxpool";
-	config_1.inputHeight  	= 26;	
-	config_1.inputWidth   	= 26;	
-	config_1.inputDepth   	= 4;	// depend on previous hyperparameter
+	config_1.inputHeight  	= 28;	
+	config_1.inputWidth   	= 28;	
+	config_1.inputDepth   	= 6;	// depend on previous hyperparameter
 	config_1.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
 	config_1.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
 
+	ConvConfig config_2;
+	config_2.layerType		= "conv";
+	config_2.inputHeight  	= 14;	 
+	config_2.inputWidth   	= 14;	
+	config_2.inputDepth   	= 6;		// depend on previous hyperparameter
+	config_2.kernelHeight 	= 5;	// hyperparameter
+	config_2.kernelWidth  	= 5;	// hyperparameter
+	config_2.numKernel    	= 16;		// hyperparameter
+	config_2.padding      	= 0;		// hyperparameter, usually zero
+	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
+	config_2.actFun			= ReLU;
+	config_2.dactFun		= dReLU;
+	config_2.opt 			= optimizer;
+
+	PoolingConfig config_3;
+	config_3.layerType		= "maxpool";
+	config_3.inputHeight  	= 10;	
+	config_3.inputWidth   	= 10;	
+	config_3.inputDepth   	= 16;	// depend on previous hyperparameter
+	config_3.kernelHeight 	= 2;	// hyperparameter, must be divisible by input widen
+	config_3.kernelWidth  	= 2;	// hyperparameter, must be divisible by input width
+
 	FlattenConfig config_4;
 	config_4.layerType	= "flatten";
-	config_4.inputHeight = 13;
-	config_4.inputWidth = 13;
-	config_4.inputDepth = 4;
+	config_4.inputHeight = 5;
+	config_4.inputWidth = 5;
+	config_4.inputDepth = 16;
 
 	DenseConfig config_5;
 	config_5.layerType = "dense";
-	config_5.inputWidth = 676;
-	config_5.outputWidth = 32;
+	config_5.inputWidth = 400;
+	config_5.outputWidth = 120;
 	config_5.actFun = ReLU;
 	config_5.dactFun = dReLU;
 	config_5.opt = optimizer;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
-	config_6.inputWidth = 32;
-	config_6.outputWidth = 10;
-	config_6.actFun = linear;
-	config_6.dactFun = dlinear;
+	config_6.inputWidth = 120;
+	config_6.outputWidth = 84;
+	config_6.actFun = ReLU;
+	config_6.dactFun = dReLU;
 	config_6.opt = optimizer;
 
 	DenseConfig config_7;
-	config_7.layerType = "softmax";
-	config_7.inputWidth = 10;
+	config_7.layerType = "dense";
+	config_7.inputWidth = 84;
 	config_7.outputWidth = 10;
+	config_7.actFun = linear;
+	config_7.dactFun = dlinear;
+	config_7.opt = optimizer;
+
+	SoftmaxConfig config_8;
+	config_8.layerType = "softmax";
+	config_8.inputWidth = 10;
+	config_8.outputWidth = 10;
 	
 	config.push_back(&config_0);
 	config.push_back(&config_1);
-	// config.push_back(&config_2);
-	// config.push_back(&config_3);
+	config.push_back(&config_2);
+	config.push_back(&config_3);
 	config.push_back(&config_4);
 	config.push_back(&config_5);
 	config.push_back(&config_6);
 	config.push_back(&config_7);
+	config.push_back(&config_8);
 
 	ConvolutionalNeuralNetwork cnn(config);
+	cnn.summary();
 
 	/* - Training with loaded data */
 	std::cout << std::fixed << std::setprecision(4);

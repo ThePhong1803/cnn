@@ -49,7 +49,7 @@ std::vector<Matrix *> dCategoricalCrossEntropy(std::vector<Matrix *> * output, s
 	for(size_t i = 0; i < output -> size(); i++)
 	{
 		errors.push_back(new Matrix((*expected)[i] -> rows(), (*expected)[i] -> cols()));
-		*errors[i] = Matrix(expected -> back() -> array() / (output -> back() -> array()));
+		*errors[i] = Matrix(expected -> back() -> array() / (output -> back() -> unaryExpr([](Scalar x) {return x + Scalar(10e-20);}).array()));
 	}
 	return errors;
 }

@@ -34,7 +34,7 @@ void Image::testing(){
 	for(int i = 0; i < this -> infoHeader.height; i++){
 		for(int j = 0; j < this -> infoHeader.width; j++){
 			int32_t idx = convertGrayScale(pixels[i][j]);
-			idx = std::round((float(idx) / 255) * 9);
+			idx = std::round((Scalar(idx) / 255) * 9);
 			std::cout << table[idx] << table[idx];
 		}
 		std::cout << std::endl;
@@ -45,28 +45,28 @@ int Image::convertGrayScale(int pixel){
 	int blue = pixel & 0xff;
 	int green = (pixel >> 8) & 0xff;
 	int red = (pixel >> 16) & 0xff;
-	return std::round(float(blue + green + red) / 3);
+	return std::round(Scalar(blue + green + red) / 3);
 }
 
-float Image::getFloatValue(int pixel){
+Scalar Image::getFloatValue(int pixel){
 	if(this -> infoHeader.bitsPerPixel == 24) {
 		int blue = pixel & 0xff;
 		int green = (pixel >> 8) & 0xff;
 		int red = (pixel >> 16) & 0xff;
-		return float(blue + green + red) / 3;
+		return Scalar(blue + green + red) / 3;
 	} else if (this -> infoHeader.bitsPerPixel == 8){
 		int blue = (pixel & 0b11100000) >> 5;
 		int green = (pixel & 0b00011100) >> 2;
 		int red = (pixel &0b00000011);
-		return float(blue + green + red) / 3;
+		return Scalar(blue + green + red) / 3;
 	} else return 0.0f;
 }
 
-std::vector<float> Image::getPixelArray() {
-	std::vector<float> ret(this -> infoHeader.width * this -> infoHeader.height);
+std::vector<Scalar> Image::getPixelArray() {
+	std::vector<Scalar> ret(this -> infoHeader.width * this -> infoHeader.height);
 	for(int i = 0; i < this -> infoHeader.height; i++){
 		for(int j = 0; j < this -> infoHeader.width; j++){
-			float_t factor = 1.0f;
+			Scalar factor = 1.0f;
 			if(this -> infoHeader.bitsPerPixel == 24) factor = 255.0f;
 			else if (this -> infoHeader.bitsPerPixel == 8) factor = 8.0f;
 			if(this -> invert)
@@ -143,7 +143,7 @@ void Image::loadImageData() {
 	}
 }
 
-std::vector<float> Image::extractPixelData(std::string path){
+std::vector<Scalar> Image::extractPixelData(std::string path){
 	Image img(path);
 	return img.getPixelArray();
 }

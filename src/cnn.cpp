@@ -60,6 +60,12 @@ std::vector<Matrix *> ConvolutionalNeuralNetwork::outputRef()
 	return this -> layer.back() -> outputRef();
 }
 
+void ConvolutionalNeuralNetwork::summary(){
+	for(size_t i = 0; i < config.size(); i++)
+	{
+		std::cout << "Layer " << config[i] -> layerType << std::endl;
+	}
+}
 // Implement convolutional neural network propagate forward method
 void ConvolutionalNeuralNetwork::propagateForward(std::vector<Matrix *> input)
 {
@@ -67,6 +73,11 @@ void ConvolutionalNeuralNetwork::propagateForward(std::vector<Matrix *> input)
 	for(size_t i = 0; i < layer.size(); i++)
 	{
 		layer[i] -> propagateForward(&layer[i] -> inputRef());
+		// std::cout << "Layer " << i << " " << config[i] -> layerType << std::endl;
+		// for(size_t j = 0; j < layer[i] -> outputRef().size(); j++)
+		// {
+		// 	std::cout << *layer[i] -> outputRef()[j] << std::endl;
+		// }
 	}
 }
 

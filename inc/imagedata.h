@@ -3,13 +3,6 @@
 #include <assert.h>
 #pragma once
 
-typedef float Scalar;
-typedef Eigen::MatrixXf Matrix;
-typedef Eigen::RowVectorXf RowVector;
-typedef Eigen::VectorXf ColVector;
-typedef uint32_t uint;
-
-
 class ImageData {
 	public:
 	// data wrapper attribute
@@ -17,11 +10,11 @@ class ImageData {
 	int id;
 	int height;
 	int width;
-	std::vector<float> pixels;
+	std::vector<Scalar> pixels;
 	
 	// constructor and destructor
 	ImageData();
-	ImageData(std::vector<float> _pixels, int _number = 0, int _id = 0);
+	ImageData(std::vector<Scalar> _pixels, int _number = 0, int _id = 0);
 	ImageData(std::string path, bool invert = false, int _number = 0, int _id = 0);
 	~ImageData();
 	

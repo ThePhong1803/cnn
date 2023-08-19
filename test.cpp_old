@@ -1,0 +1,34 @@
+#include <common.h>
+#include <softmaxlayer.h>
+#include <losscalc.h>
+
+int main() {
+    SoftmaxConfig config;
+    config.inputWidth = 10;
+    config.outputWidth = 10;
+    config.layerType = "softmax";
+    SoftmaxLayer layer(&config);
+
+    std::vector<Matrix *> input;
+    input.push_back(new Matrix(1, config.outputWidth));
+    *input.back() << -4, 1, 3, 4, 5, 3, 7, 8, 9, 1;
+
+    std::vector<Matrix *> output;
+    output.push_back(new Matrix(1, config.outputWidth));
+    *output.back() << 0, 1, 0, 0, 0, 0, 0, 0, 0, 0;
+
+    layer.propagateForward(&input);
+    std::vector<Matrix *> errors = dCategoricalCrossEntropy(&layer.outputRef(), &output);
+    layer.propagateBackward(&errors);
+    std::cout << "CCR Error: " << *errors.back() << std::endl;
+
+    std::cout << "MSE Error: " << *dMeanSquareError(&layer.outputRef(), &output).back() << std::endl;
+
+
+    while(input.size() != 0){
+        delete input.back();
+        delete output.back();
+        input.pop_back();
+        output.pop_back();
+    }
+}
