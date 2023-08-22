@@ -496,6 +496,7 @@ int main(int argc, char ** argv){
 				int epoch = atoi(buffer.c_str());
 				std::ofstream log("./log/RMSE.txt");
 				log << "LOSS" << " " << "ACC" << '\n';
+				std::cout << std::fixed << std::setprecision(4);
 				for(int i = 0; i < epoch; i++){
 					/* Train and validate after each batch*/
 					Scalar LOSS = (cnn -> train(input_data, output_data, batchSize));
