@@ -248,7 +248,7 @@ int main(int argc, char ** argv)
 	config.push_back(&config_6);
 	config.push_back(&config_7);
 
-	ConvolutionalNeuralNetwork cnn(config);
+	ConvolutionalNeuralNetwork * cnn == nullptr;
 
 	/* - Training with loaded data */
 	std::ofstream log("./log/RMSE.txt");
@@ -258,11 +258,11 @@ int main(int argc, char ** argv)
 		srand(time(NULL));
 		/* Train and validate after each batch*/
         loadDataset(input_data, output_data, targetOutputs, labelVec, batchSize);
-		Scalar LOSS = cnn.train(input_data, output_data, batchSize);
+		Scalar LOSS = cnn ->train(input_data, output_data, batchSize);
 		cleanDataBuffer(input_data);
 		cleanLabelBuffer(output_data);
 		loadTestData(input_data, output_data, targetOutputs, validateLabels, TEST);
-		Scalar ACC = cnn.validate(input_data, output_data, outputToLabelIdx, TEST);
+		Scalar ACC = cnn ->validate(input_data, output_data, outputToLabelIdx, TEST);
 		cleanDataBuffer(input_data);
 		cleanLabelBuffer(output_data);
 
@@ -276,7 +276,7 @@ int main(int argc, char ** argv)
 
 	/* - Calculate model accuracy */
 	loadTestData(input_data, output_data, targetOutputs, validateLabels, TEST);
-	Scalar accuracy = cnn.validate(input_data, output_data, outputToLabelIdx, TEST);
+	Scalar accuracy = cnn ->validate(input_data, output_data, outputToLabelIdx, TEST);
 	cleanDataBuffer(input_data);
 	std::cout << "\rModel average accuracy  : " << accuracy << std::endl;
 	std::cout << "===========================================================" << std::endl;
@@ -292,12 +292,12 @@ int main(int argc, char ** argv)
 		obj.getPixelMatrix(&testData);						// load pixel data into testing input matrix
 		std::vector<Matrix *> test;							// create vector containter for input matrix
 		test.push_back(&testData);							
-		cnn.propagateForward(test);							// propagate forward testing input matrix vector
+		cnn ->propagateForward(test);							// propagate forward testing input matrix vector
 		img.testing();										// display test sample
 		
-		int num = outputToLabelIdx(cnn.layer.back() -> outputRef().back());
-		std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn.layer.back() -> outputRef().back() -> coeff(num) << std::endl;
-		std::cout << "Output vector: " << *cnn.layer.back() -> outputRef().back() << std::endl;
+		int num = outputToLabelIdx(cnn ->layer.back() -> outputRef().back());
+		std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn ->layer.back() -> outputRef().back() -> coeff(num) << std::endl;
+		std::cout << "Output vector: " << *cnn ->layer.back() -> outputRef().back() << std::endl;
 		getline(std::cin, cmd);
 	}
 	return 0;
@@ -307,18 +307,6 @@ int main(int argc, char ** argv)
 	
 int main(int argc, char ** argv){
 	srand(time(NULL));
-	if(argc < 6) {
-		std::cout << "Using: out --learningRate --momentum --epoch --batch --decay-rate" << std::endl;
-		exit(-1);
-	}
-	Scalar learningRate = atof(argv[1]);
-	Scalar momentum     = atof(argv[2]);
-	int epoch		    = atoi(argv[3]);
-	int batchSize	    = atoi(argv[4]);
-	Scalar decay_rate	= atof(argv[5]);
-	std::cout << "Epoch: " << epoch << std::endl;
-	std::cout << "Batch size: " << batchSize << std::endl;
-
 	// loading dataset
 	/* - Fist is setup input data containter, then the expected output data container */
 	std::vector<std::vector<Matrix *>> input_data;
@@ -367,13 +355,18 @@ int main(int argc, char ** argv){
 			}
 		}
 	}
+	
+	// network training parameter
+	int batchSize = 0;
+	Scalar learningRate = 0.001;
+	Scalar momentum = 0.9;
+	Scalar decay_rate = 0.001;
 
-	Optimizer * optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
-
-	std::cout << "Learning rate: " << optimizer -> getLearningRate() << std::endl;
+	Optimizer * optimizer = nullptr;
 
 	std::vector<LayerConfig *> config;
-
+	
+	// LeNet configuration
 	ConvConfig config_0;
 	config_0.layerType	  = "conv";
 	config_0.inputHeight  = 28;
@@ -384,8 +377,8 @@ int main(int argc, char ** argv){
 	config_0.numKernel    = 6;		// hyperparameter
 	config_0.padding      = 2;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
-	config_0.actFun		  = ReLU;
-	config_0.dactFun	  = dReLU;
+	config_0.actFun		  = LeakyReLU;
+	config_0.dactFun	  = dLeakyReLU;
 	config_0.opt 		  = optimizer;
 
 	PoolingConfig config_1;
@@ -406,8 +399,8 @@ int main(int argc, char ** argv){
 	config_2.numKernel    	= 16;		// hyperparameter
 	config_2.padding      	= 0;		// hyperparameter, usually zero
 	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
-	config_2.actFun			= ReLU;
-	config_2.dactFun		= dReLU;
+	config_2.actFun			= LeakyReLU;
+	config_2.dactFun		= dLeakyReLU;
 	config_2.opt 			= optimizer;
 
 	PoolingConfig config_3;
@@ -428,16 +421,16 @@ int main(int argc, char ** argv){
 	config_5.layerType = "dense";
 	config_5.inputWidth = 400;
 	config_5.outputWidth = 120;
-	config_5.actFun = ReLU;
-	config_5.dactFun = dReLU;
+	config_5.actFun = LeakyReLU;
+	config_5.dactFun = dLeakyReLU;
 	config_5.opt = optimizer;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
 	config_6.inputWidth = 120;
 	config_6.outputWidth = 84;
-	config_6.actFun = ReLU;
-	config_6.dactFun = dReLU;
+	config_6.actFun = LeakyReLU;
+	config_6.dactFun = dLeakyReLU;
 	config_6.opt = optimizer;
 
 	DenseConfig config_7;
@@ -463,61 +456,109 @@ int main(int argc, char ** argv){
 	config.push_back(&config_7);
 	config.push_back(&config_8);
 
-	ConvolutionalNeuralNetwork cnn(config);
-	cnn.summary();
-
-	/* - Training with loaded data */
+	ConvolutionalNeuralNetwork * cnn = nullptr;
+	
 	std::cout << std::fixed << std::setprecision(4);
 	loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
 	loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
-	std::ofstream log("./log/RMSE.txt");
-	log << "LOSS" << " " << "ACC" << '\n';
-	for(int i = 0; i < epoch; i++){
-		/* Train and validate after each batch*/
-		Scalar LOSS = cnn.train(input_data, output_data, batchSize);
-		Scalar ACC = cnn.validate(input_test, output_test, outputToLabelIdx, TESTSIZE);
-
-		// update leanring rate
-
-	 	std::cout << "\rEpoch : " << i + 1 << " ACC: " << ACC << " Lr: " << optimizer -> getLearningRate() << " LOSS: " << LOSS << std::endl;
-		optimizer -> ScheduleLearningRate(Scalar(i + 1));
-		log << LOSS << " " << ACC << '\n';
-	}
-	std::cout << std::endl;
-	log.close();
-	while(config.size() != 0){
-		config.pop_back();
-	}
-	cleanDataBuffer(input_data);
-	cleanLabelBuffer(output_data);
-	cleanDataBuffer(input_test);
-	cleanLabelBuffer(output_test);
-	delete optimizer;
+	
 	std::string cmd = "";
 	std::cout << "Command$ ";
 	getline(std::cin, cmd);
 	std::cout << std::endl;
 	while(cmd != "exit"){
-		// get test sample
-		Image img("test-img/test.bmp", -1);		// open image for diesplay
-		ImageData obj("test-img/test.bmp");		// open image for extract data
-        img.setInvert(false);
+		if(cmd == "test") {
+			if(cnn != nullptr) {
+				// get test sample
+				Image img("test-img/test.bmp", -1);		// open image for diesplay
+				ImageData obj("test-img/test.bmp");		// open image for extract data
+				img.setInvert(false);
 
-		Matrix testData(img.getHeight(), img.getWidth()); 	// input data storage
-		obj.getPixelMatrix(&testData);						// load pixel data into testing input matrix
-		std::vector<Matrix *> test;							// create vector containter for input matrix
-		test.push_back(&testData);							
-		cnn.propagateForward(test);							// propagate forward testing input matrix vector
-		img.testing();										// display test sample
-		
-		int num = outputToLabelIdx(cnn.layer.back() -> outputRef().back());
-		std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn.layer.back() -> outputRef().back() -> coeff(num) << std::endl;
-		std::cout << "Output vector: " << *cnn.layer.back() -> outputRef().back() << std::endl;
+				Matrix testData(img.getHeight(), img.getWidth()); 	// input data storage
+				obj.getPixelMatrix(&testData);						// load pixel data into testing input matrix
+				std::vector<Matrix *> test;							// create vector containter for input matrix
+				test.push_back(&testData);							
+				cnn ->propagateForward(test);							// propagate forward testing input matrix vector
+				img.testing();										// display test sample
+				
+				int num = outputToLabelIdx(cnn ->layer.back() -> outputRef().back());
+				std::cout << "Predicted output: " << num << " Confident: " << std::fixed << std::setprecision(2) << cnn ->layer.back() -> outputRef().back() -> coeff(num) << std::endl;
+				std::cout << "Output vector: " << *cnn ->layer.back() -> outputRef().back() << std::endl;
+			} else {
+				std::cout << "No model for test" << std::endl;
+			}
+		} else if (cmd == "train") {
+			if(cnn != nullptr){
+				/* - Training with loaded data */
+				std::string buffer;
+				std::cout << "Epoch: ";
+				getline(std::cin, buffer);
+				int epoch = atoi(buffer.c_str());
+				std::ofstream log("./log/RMSE.txt");
+				log << "LOSS" << " " << "ACC" << '\n';
+				for(int i = 0; i < epoch; i++){
+					/* Train and validate after each batch*/
+					Scalar LOSS = (cnn -> train(input_data, output_data, batchSize));
+					Scalar ACC = (cnn -> validate(input_test, output_test, outputToLabelIdx, TESTSIZE));
+
+					// update leanring rate
+
+					std::cout << "\rEpoch : " << i + 1 << " Acc: " << ACC << " Lr: " << optimizer -> getLearningRate() << " Loss: " << LOSS << std::endl;
+					optimizer -> ScheduleLearningRate(Scalar(i + 1));
+					log << LOSS << " " << ACC << '\n';
+				}
+				std::cout << std::endl;
+				log.close();
+			} else {
+				std::cout << "Not trainable network" << std::endl;
+			}
+		}
+		else if (cmd == "new") {
+			if(cnn != nullptr) cnn -> deleteNetwork();
+			cnn = new ConvolutionalNeuralNetwork(config);
+			std::string buffer;
+	
+			std::cout << "Learn rate: ";
+			getline(std::cin, buffer);
+			learningRate = atof(buffer.c_str());
+			
+			std::cout << "Momentum: ";
+			getline(std::cin, buffer);
+			momentum     = atof(buffer.c_str());
+			
+			std::cout << "Batch size: ";
+			getline(std::cin, buffer);
+			batchSize	    = atoi(buffer.c_str());
+			
+			std::cout << "Decay rate: ";
+			getline(std::cin, buffer);
+			decay_rate	= atof(buffer.c_str());
+			
+			optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
+			config_0.opt 		  = optimizer;
+			config_2.opt 		  = optimizer;
+			config_5.opt 		  = optimizer;
+			config_6.opt 		  = optimizer;
+			config_7.opt 		  = optimizer;
+			cnn ->summary();
+			
+		} else if (cmd == "clean"){
+			delete cnn;
+			delete optimizer;
+			cnn = nullptr;
+			optimizer = nullptr;
+		}else cmd = "";
 		std::cout << "Command$ ";
 		getline(std::cin, cmd);
 		std::cout << std::endl;
 	}
-
+	cleanDataBuffer(input_data);
+	cleanLabelBuffer(output_data);
+	cleanDataBuffer(input_test);
+	cleanLabelBuffer(output_test);
+	while(config.size() != 0){
+		config.pop_back();
+	}
 	// int epoch = atoi(argv[1]);
 	// std::vector<std::vector<Matrix *>> input_set;
 	// input_set.push_back(std::vector<Matrix *>());

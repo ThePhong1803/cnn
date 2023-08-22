@@ -62,10 +62,10 @@ void SoftmaxLayer::propagateForward(std::vector<Matrix *> * input)
 {
     // check input vector size
     assert(input -> size() == 1 && output.size() == 1); // only 1 matrix element is allowed
-    // find max coeff in the input vector
-    Scalar max = input -> back() -> maxCoeff();
+	// calc max of input matrix, subtract it from the input matrix to prevent overflow, cause result to be inf or nan
+	Scalar max = input -> back() -> maxCoeff();
     // calculate  output;
-    (*output.back()) = input -> back() -> unaryExpr([&max](Scalar x) -> Scalar {return exp(x - max);}); // x - max to prevent case where x is too large, and the expoent of x will cause inf which lead to NaN
+    (*output.back()) = input -> back() -> unaryExpr([&max](Scalar x) -> Scalar {return exp(x - max);});
     Scalar sumExp = output.back() -> sum();
     (*output.back()) = output.back() -> unaryExpr([sumExp](Scalar x) -> Scalar {return x / sumExp;});
 }
@@ -82,8 +82,8 @@ void SoftmaxLayer::propagateBackward(std::vector<Matrix *> * errors)
     // // prepare error for prev layer
     // // clear error matrix:
     // while(errors -> size() != 0) {
-    //     delete errors -> back();
-    //     errors -> pop_back();
+        // delete errors -> back();
+        // errors -> pop_back();
     // }
 
     // // create conainter for prev layer matrix

@@ -9,7 +9,7 @@ BUILD_PATH = build
 # Bin path
 BIN_PATH = bin
 # compiler flags
-CFLAGS = -g -Wall -Wunknown-pragmas -march=native -Ofast -msse -mfma -mavx
+CFLAGS = -g -Wall -Wunknown-pragmas -march=native -O3 -msse -mfma -mavx
 CFLAGS_DBUG = -g -Wall -Wunknown-pragmas 
 # -g			   : this flag adds debugging info to the executable file
 # -Wall 		   : this flag is used to turn on most compiler warnings

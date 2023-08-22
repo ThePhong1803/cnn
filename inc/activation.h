@@ -2,7 +2,7 @@
 #define __ACTIVATION_H__
 
 #include <common.h>
-#define alpha 0.3 // leaky rely param
+#define alpha 0.01 // leaky rely param
 
 // list of actiation function
 Scalar Sigmoid(Scalar x);

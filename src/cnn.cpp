@@ -73,10 +73,11 @@ void ConvolutionalNeuralNetwork::propagateForward(std::vector<Matrix *> input)
 	for(size_t i = 0; i < layer.size(); i++)
 	{
 		layer[i] -> propagateForward(&layer[i] -> inputRef());
-		// std::cout << "Layer " << i << " " << config[i] -> layerType << std::endl;
+		// std::cout << "Output Layer " << i << std::endl;
 		// for(size_t j = 0; j < layer[i] -> outputRef().size(); j++)
 		// {
-		// 	std::cout << *layer[i] -> outputRef()[j] << std::endl;
+			// std::cout << "Layer " << j << std::endl;
+			// std::cout << *layer[i] -> outputRef()[j] << std::endl;
 		// }
 	}
 }
@@ -129,7 +130,7 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 			this -> propagateForward(*dataset[stIdx + n].first);
 			// calculate error matrix
 			std::vector<Matrix *> errors = dMeanSquareError(&layer.back() -> outputRef(), dataset[stIdx + n].second);
-
+			// std::cout << "Error: " << *errors.back() << std::endl;
 			// calculate loss and propagate back
 			loss += CategoricalCrossEntropy(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
 			this -> propagateBackward(errors);
@@ -137,8 +138,9 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 		// update start idx
 		this -> updateNetwork(batchSize);
 		// schedule leanring rate
-		std::cout << "\rTrain process: " << float(stIdx) / dataset.size();
+		std::cout << "\rTrain process: " << float(stIdx) / dataset.size() << " loss: " << loss / (stIdx + batchSize); // clear some char leftover from previous line
 	}
+	std::cout << "\33[2K\r";
 	return loss / dataset.size();
 }
 

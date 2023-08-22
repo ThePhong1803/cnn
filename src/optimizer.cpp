@@ -27,17 +27,17 @@ SGD::~SGD() {
 /* These function should be call when the layer in network perform weights and biases update after one batch*/
 void SGD::DenseOptimizer(DenseLayer * layer, int batch_size)
 {
-    // TODO: Implement SGD Optimization for Dense Layer
+    // Implement SGD Optimization for Dense Layer
     *(layer -> dweight) /= Scalar(batch_size);
     *(layer -> dbiases) /= Scalar(batch_size);
 	
 	// calculate velocity
-	(*layer -> vweight) = momentum * (*layer -> vweight) + learnRate * (*layer -> dweight);
-	(*layer -> vbiases) = momentum * (*layer -> vbiases) + learnRate * (*layer -> dbiases);
+	(*layer -> vweight) = momentum * (*layer -> vweight) + (*layer -> dweight) * (1 - momentum);
+	(*layer -> vbiases) = momentum * (*layer -> vbiases) + (*layer -> dbiases) * (1 - momentum);
 	
 	// weight update
-	(*layer -> weight) += (*layer -> vweight);
-	(*layer -> biases) += (*layer -> vbiases);
+	(*layer -> weight) -= learnRate * (*layer -> vweight);
+	(*layer -> biases) -= learnRate * (*layer -> vbiases);
 
     // reset change in weights and biases
     layer -> dweight -> setZero();
@@ -46,16 +46,20 @@ void SGD::DenseOptimizer(DenseLayer * layer, int batch_size)
 }
 void SGD::ConvOptimizer(ConvolutionalLayer * layer, int batch_size)
 {
-    // TODO: Implement SGD Optimization for Convolutional Layer
+    // Implement SGD Optimization for Convolutional Layer
     for(size_t i = 0; i < layer -> kernel.size(); i++)
 	{
+		// std::cout << layer -> config -> layerType << " kernel " << i << std::endl;
 		//loop through all kernel in kernel vector
 		for(size_t l = 0; l < layer -> kernel[i].size(); l++)
 		{
 			//Loop through all kernel layer in kernel
 			*layer -> dkernel[i][l] /= Scalar(batch_size);   // calc average gradient
-            *layer -> vkernel[i][l] = momentum * (*layer -> vkernel[i][l]) + (*layer -> dkernel[i][l]) * learnRate;
-            *layer -> kernel[i][l] += *layer -> vkernel[i][l];
+            *layer -> vkernel[i][l] = momentum * (*layer -> vkernel[i][l]) + (*layer -> dkernel[i][l]) * (1 - momentum);
+            *layer -> kernel[i][l] -= learnRate * (*layer -> vkernel[i][l]);
+			
+			// std::cout << "Layer " << l << std::endl;
+			// std::cout << *layer -> kernel[i][l] << std::endl;
 
             // reset kernel layer gradient
             layer -> dkernel[i][l] -> setZero();
@@ -65,10 +69,13 @@ void SGD::ConvOptimizer(ConvolutionalLayer * layer, int batch_size)
     // loop through all biases matrix in bias matrix vector
     for(size_t i = 0; i < layer -> biases.size(); i++)
     {
+		// std::cout << layer -> config -> layerType << " biases " << i << std::endl;
         *layer -> dbiases[i] /= Scalar(batch_size);
-        *layer -> vbiases[i] = momentum * (*layer -> vbiases[i]) + (*layer -> dbiases[i]) * learnRate;
-        *layer -> biases[i] += *layer -> vbiases[i];
-
+        *layer -> vbiases[i] = momentum * (*layer -> vbiases[i]) + (*layer -> dbiases[i]) * learnRate * (1 - momentum);
+        *layer -> biases[i] -= learnRate * (*layer -> vbiases[i]);
+		
+		// std::cout << *layer -> biases[i] << std::endl;
+		
         // reset biases matrix gradient
         layer -> dbiases[i] -> setZero();
     }

@@ -12,7 +12,7 @@ std::vector<Matrix *> dMeanSquareError(std::vector<Matrix *> * output, std::vect
 	for(size_t i = 0; i < output -> size(); i++)
 	{
 		errors.push_back(new Matrix((*expected)[i] -> rows(), (*expected)[i] -> cols()));
-		*errors[i] = *(*expected)[i] - *(*output)[i];
+		*errors[i] = *(*output)[i] - *(*expected)[i];
 	}
 	return errors;
 }
@@ -23,7 +23,7 @@ std::vector<Matrix *> dMeanSquareError(std::vector<Matrix *> * output, std::vect
 // }
 
 Scalar 	BinaryCrossEntropy(Matrix * vec, Matrix * expected) {
-	return Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x);})).array())).mean();
+	return Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x);})).array())).sum();
 }
 
 std::vector<Matrix *> dBinaryCrossEntropy(std::vector<Matrix *> * output, std::vector<Matrix *> * expected)
@@ -40,7 +40,7 @@ std::vector<Matrix *> dBinaryCrossEntropy(std::vector<Matrix *> * output, std::v
 }
 
 Scalar 	CategoricalCrossEntropy(Matrix * vec, Matrix * expected) {
-	return Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x + 10e-7);})).array())).mean();
+	return Matrix((( - *expected).array() * (vec -> unaryExpr([](Scalar x) -> Scalar { return log(x + 10e-7);})).array())).sum();
 }
 
 std::vector<Matrix *> dCategoricalCrossEntropy(std::vector<Matrix *> * output, std::vector<Matrix *> * expected)
@@ -49,7 +49,7 @@ std::vector<Matrix *> dCategoricalCrossEntropy(std::vector<Matrix *> * output, s
 	for(size_t i = 0; i < output -> size(); i++)
 	{
 		errors.push_back(new Matrix((*expected)[i] -> rows(), (*expected)[i] -> cols()));
-		*errors[i] = Matrix(expected -> back() -> array() / (output -> back() -> unaryExpr([](Scalar x) {return x + Scalar(10e-20);}).array()));
+		*errors[i] = Matrix(expected -> back() -> array() / output -> back() -> unaryExpr([](Scalar x) -> Scalar {return  x + 10e-20;}).array());
 	}
 	return errors;
 }

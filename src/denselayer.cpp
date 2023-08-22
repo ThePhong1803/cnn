@@ -92,7 +92,7 @@ void DenseLayer::propagateForward(std::vector<Matrix *> * input)
     // calculate weighted output;
     (*caches.back()) = (*input -> back()) * (*weight) + (*biases);
     // apply activation fucntion
-    (*output.back()) = caches.back() -> unaryExpr(std::function(config -> actFun));
+    (*output.back()) = caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> actFun(x);});
 }
 
 void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
@@ -100,9 +100,8 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     // check erros vector size
     assert(errors -> size() == 1 && output.size() == 1 && caches.size() == 1);
     // calcualte error signal
-    Matrix delta = Matrix((errors -> back() -> array()) * (caches.back() -> unaryExpr(std::function(config -> dactFun)).array()));
+    Matrix delta = Matrix((errors -> back() -> array()) * (caches.back() -> unaryExpr([this](Scalar x) {return this -> config -> dactFun(x);}).array()));
     // prepare error for prev layer
-    // (*errors -> back()) = (*errors -> back()) * (weight -> transpose());
     (*errors -> back()) = delta * (weight -> transpose());
 
     // update weight and bias, we will optimize this with mini-batches

@@ -42,7 +42,6 @@ class ConvolutionalNeuralNetwork
 	// model summary: print out model structure
 	void summary();
 	
-	private:
 	void deleteNetwork();
 };
 
