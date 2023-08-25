@@ -109,9 +109,9 @@ void DenseLayer::propagateBackward(std::vector<Matrix *> * errors)
     (*dbiases) += delta;
 }
 
-void DenseLayer::updateWeightsAndBiases(int batch_size) 
+void DenseLayer::updateWeightsAndBiases(int batch_size, Optimizer * optimizer) 
 {
     /* Usually call function from optimier */
     // for testing we gonnal do it here
-    config -> opt -> DenseOptimizer(this, batch_size);
+    optimizer-> DenseOptimizer(this, batch_size);
 }

@@ -13,5 +13,6 @@ Scalar LeakyReLU(Scalar x);
 Scalar dLeakyReLU(Scalar x);
 Scalar tanhAct(Scalar x);
 Scalar dtanhAct(Scalar x);
-
+Scalar SiLU(Scalar x);
+Scalar dSiLU(Scalar x);
 #endif

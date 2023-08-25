@@ -25,7 +25,7 @@ LayerConfig::~LayerConfig()
 	// Do nothing, this is virtual destructor so let derive class destructor do the work
 }
 
-void Layer::updateWeightsAndBiases(int batch_size)
+void Layer::updateWeightsAndBiases(int batch_size, Optimizer * optimizer)
 {
 	// Do nothing
 }

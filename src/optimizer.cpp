@@ -4,17 +4,18 @@
 SGD::SGD()
 {
 	// default optimizer contructor
+    this -> lr_cnt          = 0;
 	this -> learnRate 	    = 0.01f;
 	this -> momentum 	    = 0.90f;
     this -> lr_scheduler    = new LearningRateScheduler();
 }
 
-SGD::SGD(Scalar _learnRate, Scalar _momentum) : Optimizer(), learnRate(_learnRate), momentum(_momentum)
+SGD::SGD(Scalar _learnRate, Scalar _momentum) : Optimizer(), lr_cnt(0), learnRate(_learnRate), momentum(_momentum)
 {
     this -> lr_scheduler    = new LearningRateScheduler(_learnRate);
 }	
 
-SGD::SGD(Scalar _learnRate, Scalar _momentum, LearningRateScheduler * _lr_scheduler) : Optimizer(), learnRate(_learnRate), momentum(_momentum)
+SGD::SGD(Scalar _learnRate, Scalar _momentum, LearningRateScheduler * _lr_scheduler) : Optimizer(), lr_cnt(0), learnRate(_learnRate), momentum(_momentum)
 {
     this -> lr_scheduler = _lr_scheduler;
     this -> lr_scheduler -> lr = _learnRate;
@@ -81,12 +82,13 @@ void SGD::ConvOptimizer(ConvolutionalLayer * layer, int batch_size)
     }
 }
 
-Scalar SGD::getLearningRate(){
+Scalar &SGD::getLearningRate(){
     return this -> learnRate;
 }
 
-void SGD::ScheduleLearningRate(Scalar step) {
-    this -> lr_scheduler -> updateLearningRate(step);
+void SGD::ScheduleLearningRate() {
+    this -> lr_cnt += 1.0f;
+    this -> lr_scheduler -> updateLearningRate(this -> lr_cnt);
     this -> learnRate = lr_scheduler -> getLearningRate();
 }
 
@@ -113,5 +115,5 @@ ExponentDecayLearnRate::~ExponentDecayLearnRate()
 
 void ExponentDecayLearnRate::updateLearningRate(Scalar step)
 {
-    this -> lr = this -> lr * exp(-decay_factor * Scalar(step));
+    this -> lr = this -> lr * exp(-decay_factor * step);
 }

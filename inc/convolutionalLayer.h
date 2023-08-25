@@ -30,7 +30,6 @@ class ConvConfig : public LayerConfig{
 	// layer activation function config
 	ScalarFunPtr actFun;
 	ScalarFunPtr dactFun;
-	Optimizer * opt;
 	
 	uint32_t &inputHeightRef();
 	uint32_t &inputWidthRef();
@@ -72,6 +71,6 @@ class ConvolutionalLayer : public Layer {
 	void propagateBackward(std::vector<Matrix*> * errors) override;
 
 	// this function perform layer update parameters
-	void updateWeightsAndBiases(int batch_size) override;
+	void updateWeightsAndBiases(int batch_size, Optimizer * optimizer) override;
 };
 #endif

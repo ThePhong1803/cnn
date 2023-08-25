@@ -15,6 +15,7 @@ class ConvolutionalNeuralNetwork
 	public:
 	std::vector<Layer *> 		layer;	// a vector container for all layer in this neural network
 	std::vector<LayerConfig *> 	config;
+	Optimizer *					optimizer;
 	
 	public:
 	std::vector<Matrix *> 		inputRef();
@@ -22,7 +23,7 @@ class ConvolutionalNeuralNetwork
 
 	
 	// convolutional neural network constructor and destructor
-	ConvolutionalNeuralNetwork(std::vector<LayerConfig *> _config);
+	ConvolutionalNeuralNetwork(std::vector<LayerConfig *> _config, Optimizer * _optimizer);
 	~ConvolutionalNeuralNetwork();
 	
 	// this function perform feed forward for output network
@@ -36,8 +37,8 @@ class ConvolutionalNeuralNetwork
 	// train and validate neural network
 	// train method perform training on network and return the mse value mini batches
 	// validate method perform validating on network and return the accuracy of the network
-	Scalar train(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int batchSize);
-	Scalar validate(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *), int batchSize);
+	std::pair<Scalar, Scalar> train(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *), int batchSize);
+	std::pair<Scalar, Scalar> validate(std::vector<std::vector<Matrix *>> input,std::vector<std::vector<Matrix *>> output, int (*outputToLabelIdx)(Matrix *), int batchSize);
 
 	// model summary: print out model structure
 	void summary();

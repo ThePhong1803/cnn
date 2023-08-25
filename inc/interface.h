@@ -2,6 +2,16 @@
 #define __LAYER_H__
 #include <common.h>
 
+/* Class layer definition prototype*/
+class Layer;
+class ConvolutionalLayer;
+class DenseLayer;
+class FlattenLayer;
+class MaxPoolingLayer;
+
+/* Optimizer prototype */
+class Optimizer;
+
 /* An interface for different type of layer in network */
 class Layer {
 	public:
@@ -11,18 +21,12 @@ class Layer {
 	// share methoid between layer classes
 	virtual void propagateForward(std::vector<Matrix*> * input) = 0;
 	virtual void propagateBackward(std::vector<Matrix*> * errors) = 0;
-	virtual void updateWeightsAndBiases(int batch_size);
+	virtual void updateWeightsAndBiases(int batch_size, Optimizer * optimizer);
 	
 	// element access in derive classes
 	virtual std::vector<Matrix*> &outputRef() = 0;  // access to layer output vector
 	virtual std::vector<Matrix*> &inputRef() = 0;	// access to layer input vector
 };
-
-/* Layer Derive Class Declaration for other class to reference */
-class ConvolutionalLayer;
-class DenseLayer;
-class FlattenLayer;
-class MaxPoolingLayer;
 
 /* Base class prototype declaration */
 class Optimizer 
@@ -32,8 +36,8 @@ class Optimizer
     virtual ~Optimizer();
     virtual void DenseOptimizer(DenseLayer * layer, int batch_size) = 0;
     virtual void ConvOptimizer(ConvolutionalLayer * layer, int batch_size) = 0;
-	virtual void ScheduleLearningRate(Scalar step) = 0;
-	virtual Scalar getLearningRate() = 0;
+	virtual void ScheduleLearningRate() = 0;
+	virtual Scalar &getLearningRate() = 0;
 };
 
 class LearningRateScheduler {

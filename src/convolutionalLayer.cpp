@@ -334,9 +334,9 @@ void ConvolutionalLayer::propagateBackward(std::vector<Matrix *> * errors)
 }
 
 // this function perform layer parameters update
-void ConvolutionalLayer::updateWeightsAndBiases(int batch_size)
+void ConvolutionalLayer::updateWeightsAndBiases(int batch_size, Optimizer * optimizer)
 {
 	/* Usually call function from optimier */
     // for testing we gonnal do it here
-    config -> opt -> ConvOptimizer(this, batch_size);
+    optimizer -> ConvOptimizer(this, batch_size);
 }

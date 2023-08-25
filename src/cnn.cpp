@@ -3,7 +3,7 @@
 /* convolutional neuralnetwork implementation */
 
 // convolutional neuralnetwork consturctor
-ConvolutionalNeuralNetwork::ConvolutionalNeuralNetwork(std::vector<LayerConfig *> _config) : config(_config) {
+ConvolutionalNeuralNetwork::ConvolutionalNeuralNetwork(std::vector<LayerConfig *> _config, Optimizer * _optimizer) : config(_config), optimizer(_optimizer) {
 	for(size_t i = 0; i < config.size(); i++)
 	{
 		if		(config[i] -> layerType == "conv") {
@@ -100,13 +100,14 @@ void ConvolutionalNeuralNetwork::propagateBackward(std::vector<Matrix*> errors)
 
 void ConvolutionalNeuralNetwork::updateNetwork(int batchSize) {
 	for(size_t i = 0; i < layer.size(); i++){
-		layer[i] -> updateWeightsAndBiases(batchSize);
+		layer[i] -> updateWeightsAndBiases(batchSize, this -> optimizer);
 	}
 }
 
 // training and validate implementation
-Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> input,
+std::pair<Scalar, Scalar> ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> input,
 										 std::vector<std::vector<Matrix *>> output,
+										 int (*outputToLabelIdx)(Matrix *), 
 										 int batchSize)
 {
 	// fist we shuffle train data
@@ -121,6 +122,7 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 	// in 1 epoch, we loop throught all batches which assamble the entire dataset
 	size_t stIdx = 0;
 	Scalar loss = 0;
+	Scalar acc = 0;
 	for(; stIdx < dataset.size(); stIdx += batchSize)
 	{
 		/* Loop throught all element in a batch */
@@ -128,36 +130,46 @@ Scalar ConvolutionalNeuralNetwork::train(std::vector<std::vector<Matrix *>> inpu
 		{
 			// propagate forward train data
 			this -> propagateForward(*dataset[stIdx + n].first);
+			// calculate the accuracy
+			int output_num   = outputToLabelIdx(layer.back() -> outputRef().back());
+			int expected_num = outputToLabelIdx(dataset[stIdx + n].second -> back());
+			if(output_num == expected_num) acc++;
 			// calculate error matrix
 			std::vector<Matrix *> errors = dMeanSquareError(&layer.back() -> outputRef(), dataset[stIdx + n].second);
 			// std::cout << "Error: " << *errors.back() << std::endl;
+			
 			// calculate loss and propagate back
 			loss += CategoricalCrossEntropy(layer.back() -> outputRef().back(), dataset[stIdx + n].second -> back());
 			this -> propagateBackward(errors);
+
 		}
 		// update start idx
 		this -> updateNetwork(batchSize);
-		// schedule leanring rate
-		std::cout << "\rTrain process: " << float(stIdx) / dataset.size() << " loss: " << loss / (stIdx + batchSize); // clear some char leftover from previous line
+		std::cout << "\rTrain process: " << float(stIdx) / dataset.size() << " loss: " << loss / (stIdx + batchSize) << " acc: " << acc / (stIdx + batchSize); // clear some char leftover from previous line
 	}
+	// schedule leanring rate
+	this -> optimizer -> ScheduleLearningRate(); // batch base scheduler
 	std::cout << "\33[2K\r";
-	return loss / dataset.size();
+	return std::pair<Scalar, Scalar>(loss / dataset.size(), acc / dataset.size());
 }
 
-Scalar ConvolutionalNeuralNetwork::validate(std::vector<std::vector<Matrix *>> input,
+std::pair<Scalar, Scalar> ConvolutionalNeuralNetwork::validate(std::vector<std::vector<Matrix *>> input,
 											std::vector<std::vector<Matrix *>> output,
 											int (*outputToLabelIdx)(Matrix *), 
 											int batchSize)
 {
-	Scalar ACC = 0;
+	Scalar acc = 0;
+	Scalar loss = 0;
 	for(int n = 0; n < batchSize; n++)
 	{
 		this -> propagateForward(input[n]);
-		// calculate mean square errors
+		// calculate loss and accuracy
+		loss += CategoricalCrossEntropy(layer.back() -> outputRef().back(), output[n].back());
 		int output_num   = outputToLabelIdx(layer.back() -> outputRef().back());
 		int expected_num = outputToLabelIdx(output[n].back());
-		if(output_num == expected_num) ACC++;
+		if(output_num == expected_num) acc++;
+
 		std::cout << "\rValidate process: " << float(n + 1) / batchSize;
 	}
-	return ACC / batchSize;
+	return std::pair<Scalar, Scalar>(loss / batchSize , acc / batchSize);
 }

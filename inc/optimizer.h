@@ -9,6 +9,7 @@
 /* Stochastic Gradient Descent Implementation */
 class SGD : public Optimizer 
 {
+    Scalar lr_cnt;
 	Scalar learnRate;
     Scalar momentum;
     LearningRateScheduler * lr_scheduler;
@@ -19,8 +20,8 @@ class SGD : public Optimizer
     ~SGD();
     void DenseOptimizer(DenseLayer * layer, int batch_size) override;
     void ConvOptimizer(ConvolutionalLayer * layer, int batch_size) override;
-    void ScheduleLearningRate(Scalar step) override;
-    Scalar getLearningRate() override;
+    void ScheduleLearningRate() override;
+    Scalar &getLearningRate() override;
 };
 
 class ExponentDecayLearnRate : public LearningRateScheduler

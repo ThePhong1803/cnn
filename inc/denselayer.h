@@ -17,7 +17,6 @@ class DenseConfig : public LayerConfig
     // layer activation function config
 	ScalarFunPtr actFun;
 	ScalarFunPtr dactFun;
-    Optimizer * opt;
 
     DenseConfig();
     ~DenseConfig();
@@ -50,7 +49,7 @@ class DenseLayer : public Layer
     // main method for this layer
     void propagateForward(std::vector<Matrix *> * input) override;
     void propagateBackward(std::vector<Matrix *> * errors) override;
-    void updateWeightsAndBiases(int batch_size) override;
+    void updateWeightsAndBiases(int batch_size, Optimizer * optimizer) override;
 
     // io access method
     std::vector<Matrix *> &inputRef() override;

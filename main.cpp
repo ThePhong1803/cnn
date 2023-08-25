@@ -357,7 +357,7 @@ int main(int argc, char ** argv){
 	}
 	
 	// network training parameter
-	int batchSize = 0;
+	int batchSize = 1;
 	Scalar learningRate = 0.001;
 	Scalar momentum = 0.9;
 	Scalar decay_rate = 0.001;
@@ -377,9 +377,8 @@ int main(int argc, char ** argv){
 	config_0.numKernel    = 6;		// hyperparameter
 	config_0.padding      = 2;		// hyperparameter, usually zero
 	config_0.striding     = 1;		// hyperparameter ?? (unsure, use default)
-	config_0.actFun		  = LeakyReLU;
-	config_0.dactFun	  = dLeakyReLU;
-	config_0.opt 		  = optimizer;
+	config_0.actFun		  = SiLU;
+	config_0.dactFun	  = dSiLU;
 
 	PoolingConfig config_1;
 	config_1.layerType		= "maxpool";
@@ -399,9 +398,8 @@ int main(int argc, char ** argv){
 	config_2.numKernel    	= 16;		// hyperparameter
 	config_2.padding      	= 0;		// hyperparameter, usually zero
 	config_2.striding     	= 1;		// hyperparameter ??? (unsure, use default)
-	config_2.actFun			= LeakyReLU;
-	config_2.dactFun		= dLeakyReLU;
-	config_2.opt 			= optimizer;
+	config_2.actFun			= SiLU;
+	config_2.dactFun		= dSiLU;
 
 	PoolingConfig config_3;
 	config_3.layerType		= "maxpool";
@@ -421,17 +419,15 @@ int main(int argc, char ** argv){
 	config_5.layerType = "dense";
 	config_5.inputWidth = 400;
 	config_5.outputWidth = 120;
-	config_5.actFun = LeakyReLU;
-	config_5.dactFun = dLeakyReLU;
-	config_5.opt = optimizer;
+	config_5.actFun = SiLU;
+	config_5.dactFun = dSiLU;
 
 	DenseConfig config_6;
 	config_6.layerType = "dense";
 	config_6.inputWidth = 120;
 	config_6.outputWidth = 84;
-	config_6.actFun = LeakyReLU;
-	config_6.dactFun = dLeakyReLU;
-	config_6.opt = optimizer;
+	config_6.actFun = SiLU;
+	config_6.dactFun = dSiLU;
 
 	DenseConfig config_7;
 	config_7.layerType = "dense";
@@ -439,7 +435,6 @@ int main(int argc, char ** argv){
 	config_7.outputWidth = 10;
 	config_7.actFun = linear;
 	config_7.dactFun = dlinear;
-	config_7.opt = optimizer;
 
 	SoftmaxConfig config_8;
 	config_8.layerType = "softmax";
@@ -458,16 +453,36 @@ int main(int argc, char ** argv){
 
 	ConvolutionalNeuralNetwork * cnn = nullptr;
 	
-	std::cout << std::fixed << std::setprecision(4);
-	loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
-	loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
-	
+	std::cout << std::fixed << std::setprecision(4);	
 	std::string cmd = "";
 	std::cout << "Command$ ";
 	getline(std::cin, cmd);
 	std::cout << std::endl;
 	while(cmd != "exit"){
-		if(cmd == "test") {
+		if(cmd == "load") {
+			std::string buffer;
+			std::cout << "Training data size: ";
+			getline(std::cin, buffer);
+			int datasize = atoi(buffer.c_str());
+			
+			std::cout << "Testing data size: ";
+			getline(std::cin, buffer);
+			int testsize = atoi(buffer.c_str());
+
+			if(datasize > 0 && testsize > 0 && datasize <= DATASIZE && testsize <= TESTSIZE) {
+				// clean dataset before loading
+				cleanDataBuffer(input_data);
+				cleanLabelBuffer(output_data);
+				cleanDataBuffer(input_test);
+				cleanLabelBuffer(output_test);
+
+				// loading training data set and testing dataset
+				loadDataset(input_data, output_data, targetOutputs, labelVec, datasize);
+				loadTestData(input_test, output_test, targetOutputs, validateLabels, testsize);
+			} else {
+				std::cout << "Invalid Training data size or Testing data size" << std::endl;
+			}
+		} else if(cmd == "test") {
 			if(cnn != nullptr) {
 				// get test sample
 				Image img("test-img/test.bmp", -1);		// open image for diesplay
@@ -488,7 +503,7 @@ int main(int argc, char ** argv){
 				std::cout << "No model for test" << std::endl;
 			}
 		} else if (cmd == "train") {
-			if(cnn != nullptr){
+			if(cnn != nullptr && input_data.size() != 0 && output_data.size() != 0 && input_test.size() != 0 && output_test.size() != 0) {
 				/* - Training with loaded data */
 				std::string buffer;
 				std::cout << "Epoch: ";
@@ -499,56 +514,76 @@ int main(int argc, char ** argv){
 				std::cout << std::fixed << std::setprecision(4);
 				for(int i = 0; i < epoch; i++){
 					/* Train and validate after each batch*/
-					Scalar LOSS = (cnn -> train(input_data, output_data, batchSize));
-					Scalar ACC = (cnn -> validate(input_test, output_test, outputToLabelIdx, TESTSIZE));
+					std::pair<Scalar, Scalar> train_res = (cnn -> train(input_data, output_data, outputToLabelIdx, batchSize));
+					std::pair<Scalar, Scalar> valid_res = (cnn -> validate(input_test, output_test, outputToLabelIdx, input_test.size()));
 
-					// update leanring rate
-
-					std::cout << "\rEpoch : " << i + 1 << " Acc: " << ACC << " Lr: " << optimizer -> getLearningRate() << " Loss: " << LOSS << std::endl;
-					optimizer -> ScheduleLearningRate(Scalar(i + 1));
-					log << LOSS << " " << ACC << '\n';
+					std::cout << "\rEpoch : " << i + 1 << " Train loss: " << train_res.first << " Train acc: " << train_res.second;
+					std::cout << ". Validate loss: " << valid_res.first << " Validate acc: " << valid_res.second;
+					std::cout << ". Next learning rate: " << cnn -> optimizer -> getLearningRate() << std::endl;
+					log << train_res.first << " " << train_res.second << " " << valid_res.first << " " << valid_res.second << std::endl;
 				}
 				std::cout << std::endl;
 				log.close();
 			} else {
-				std::cout << "Not trainable network" << std::endl;
+				std::cout << "Not trainable network or dataset" << std::endl;
 			}
 		}
 		else if (cmd == "new") {
-			if(cnn != nullptr) cnn -> deleteNetwork();
-			cnn = new ConvolutionalNeuralNetwork(config);
 			std::string buffer;
-	
-			std::cout << "Learn rate: ";
+			std::cout << "Use default ? (y, yes, n, no): ";
 			getline(std::cin, buffer);
-			learningRate = atof(buffer.c_str());
-			
-			std::cout << "Momentum: ";
-			getline(std::cin, buffer);
-			momentum     = atof(buffer.c_str());
-			
-			std::cout << "Batch size: ";
-			getline(std::cin, buffer);
-			batchSize	    = atoi(buffer.c_str());
-			
-			std::cout << "Decay rate: ";
-			getline(std::cin, buffer);
-			decay_rate	= atof(buffer.c_str());
-			
-			optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
-			config_0.opt 		  = optimizer;
-			config_2.opt 		  = optimizer;
-			config_5.opt 		  = optimizer;
-			config_6.opt 		  = optimizer;
-			config_7.opt 		  = optimizer;
-			cnn ->summary();
-			
+			if(buffer == "n" || buffer == "no"){
+				if(cnn != nullptr) cnn -> deleteNetwork();
+				
+				std::cout << "Learn rate: ";
+				getline(std::cin, buffer);
+				learningRate = atof(buffer.c_str());
+				
+				std::cout << "Momentum: ";
+				getline(std::cin, buffer);
+				momentum     = atof(buffer.c_str());
+				
+				std::cout << "Batch size: ";
+				getline(std::cin, buffer);
+				batchSize	    = atoi(buffer.c_str());
+				
+				std::cout << "Decay rate: ";
+				getline(std::cin, buffer);
+				decay_rate	= atof(buffer.c_str());
+				if(learningRate != 0 && batchSize != 0) {
+					optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
+					cnn = new ConvolutionalNeuralNetwork(config, optimizer);
+					cnn ->summary();
+				} else std::cout << "Invalid learning rate or batch size" << std::endl;
+			} else if (buffer == "y" || buffer == "yes"){
+				if(cnn != nullptr) cnn -> deleteNetwork();
+				optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
+				cnn = new ConvolutionalNeuralNetwork(config, optimizer);
+				cnn ->summary();
+			} else if(cmd == "optconfig") {
+				if(cnn != nullptr) {
+					std::cout << "Learn rate: ";
+					getline(std::cin, buffer);
+					learningRate = atof(buffer.c_str());
+
+					cnn -> optimizer -> getLearningRate() = learningRate;
+				}
+				else std::cout << "No configurable optimizer" << std::endl;
+			}
+			else std::cout << "Unknown command" << std::endl;
 		} else if (cmd == "clean"){
 			delete cnn;
 			delete optimizer;
 			cnn = nullptr;
 			optimizer = nullptr;
-		}else cmd = "";
+			cleanDataBuffer(input_data);
+			cleanLabelBuffer(output_data);
+			cleanDataBuffer(input_test);
+			cleanLabelBuffer(output_test);
+		}else {
+			std::cout << "Unknown command " << cmd << std::endl;
+			cmd = "";
+		}
 		std::cout << "Command$ ";
 		getline(std::cin, cmd);
 		std::cout << std::endl;

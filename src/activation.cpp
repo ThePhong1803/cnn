@@ -47,3 +47,15 @@ Scalar dtanhAct(Scalar x)
 {
 	return 1 - std::tanh(x) * std::tanh(x);
 }
+
+Scalar SiLU(Scalar x)
+{
+	// Sigmoid linear unit
+	return x * Sigmoid(x);
+}
+
+Scalar dSiLU(Scalar x)
+{
+	// Sigmoid linear unit derivative
+	return Sigmoid(x) * (1 + x * (1 - Sigmoid(x)));
+}
