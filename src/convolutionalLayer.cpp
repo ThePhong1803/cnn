@@ -201,6 +201,7 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 			vkernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
 			dkernel.back().push_back(new Matrix(config -> kernelHeight, config -> kernelWidth));
 			// init kernel with random value
+			
 			kernel.back().back() -> setRandom();
 			vkernel.back().back() -> setZero();
 			dkernel.back().back() -> setZero();
@@ -213,6 +214,7 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 		// output, caches and biases with k layers
 		output.push_back(new Matrix(R, C));
 		caches.push_back(new Matrix(R, C));
+
 		biases.push_back(new Matrix(R, C));
 		vbiases.push_back(new Matrix(R, C));
 		dbiases.push_back(new Matrix(R, C));
@@ -220,6 +222,7 @@ ConvolutionalLayer::ConvolutionalLayer(ConvConfig * _config) : Layer(), config(_
 		// init output and bias with zero and random (zero for now)
 		output.back() -> setZero();
 		caches.back() -> setZero();
+
 		biases.back() -> setZero();
 		vbiases.back() -> setZero();
 		dbiases.back() -> setZero();

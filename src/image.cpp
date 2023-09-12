@@ -14,10 +14,12 @@ void Image::getHeaderInfo() {
 }
 
 void Image::getImageInfo() {
-	std::cout << "Image width: " 		<< this -> infoHeader.width 		 << std::endl;
-	std::cout << "Image height: " 		<< this -> infoHeader.height		 << std::endl;
-	std::cout << "Bytes per pixel: " 	<< this -> infoHeader.bitsPerPixel 	 << std::endl;
-	std::cout << "Image size: " 		<< this -> infoHeader.imageSize 	 << std::endl;
+	std::cout << "Image width: " 		<< this -> infoHeader.width 		  << std::endl;
+	std::cout << "Image height: " 		<< this -> infoHeader.height		  << std::endl;
+	std::cout << "Bit per pixel: " 		<< this -> infoHeader.bitsPerPixel 	  << std::endl;
+	std::cout << "Image size: " 		<< this -> infoHeader.imageSize 	  << std::endl;
+	std::cout << "Used colors: "		<< this -> infoHeader.colorsUsed	  << std::endl;
+	std::cout << "Important colors: "	<< this -> infoHeader.importantColors << std::endl;
 }
 
 void Image::hexdump(){
@@ -55,10 +57,7 @@ Scalar Image::getFloatValue(int pixel){
 		int red = (pixel >> 16) & 0xff;
 		return Scalar(blue + green + red) / 3;
 	} else if (this -> infoHeader.bitsPerPixel == 8){
-		int blue = (pixel & 0b11100000) >> 5;
-		int green = (pixel & 0b00011100) >> 2;
-		int red = (pixel &0b00000011);
-		return Scalar(blue + green + red) / 3;
+		return pixel;
 	} else return 0.0f;
 }
 
@@ -66,13 +65,10 @@ std::vector<Scalar> Image::getPixelArray() {
 	std::vector<Scalar> ret(this -> infoHeader.width * this -> infoHeader.height);
 	for(int i = 0; i < this -> infoHeader.height; i++){
 		for(int j = 0; j < this -> infoHeader.width; j++){
-			Scalar factor = 1.0f;
-			if(this -> infoHeader.bitsPerPixel == 24) factor = 255.0f;
-			else if (this -> infoHeader.bitsPerPixel == 8) factor = 8.0f;
 			if(this -> invert)
-				ret[i * this -> infoHeader.width + j] = 1.0f - getFloatValue(pixels[i][j]) / factor;
+				ret[i * this -> infoHeader.width + j] = 1.0f - getFloatValue(pixels[i][j]) / 255.0f;
 			else 
-				ret[i * this -> infoHeader.width + j] = getFloatValue(pixels[i][j]) / factor;
+				ret[i * this -> infoHeader.width + j] = getFloatValue(pixels[i][j]) / 255.0f;
 		}
 	}
 	return ret;
@@ -120,19 +116,32 @@ void Image::loadImageData() {
 				delete [] Buffer;
 			} else if (this -> infoHeader.bitsPerPixel / 8 == 1) {
 				// Loading the entire image pixels data into Buffer
-				this -> file.seekg(this -> fileHeader.dataOffset, std::ios::beg);
-				char * Buffer = new char[this -> infoHeader.height * this -> infoHeader.width];
-				file.read(Buffer, this -> infoHeader.height * this -> infoHeader.width);
+				// this -> file.seekg(this -> fileHeader.dataOffset, std::ios::beg);
+
+				std::vector<uint8_t> palette(1024);
+				file.read(reinterpret_cast<char*>(palette.data()), palette.size());
+
+				std::vector<uint8_t> imageData(infoHeader.width * infoHeader.height);
+				file.read(reinterpret_cast<char*>(imageData.data()), imageData.size());
+
+
+				// Conversion to grayscale
+				std::vector<uint8_t> grayscaleData(infoHeader.width * infoHeader.height);
+				for (int i = 0; i < infoHeader.width * infoHeader.height; ++i) {
+					uint8_t colorIndex = imageData[i];
+					uint8_t grayscaleValue = palette[colorIndex * 4]; // R, G, and B are the same in grayscale
+					grayscaleData[i] = grayscaleValue;
+				}
+
 				std::vector<std::vector<int>> _pixels(this -> infoHeader.height, std::vector<int>(this -> infoHeader.width));
 				uint32_t dataindex = 0;
 				for(int i = this -> infoHeader.height - 1; i >= 0; i--){
 					for(int j = 0; j < this -> infoHeader.width; j++){
-						_pixels[i][j] = (int)Buffer[dataindex + j];
+						_pixels[i][j] = grayscaleData[dataindex + j];
 					}
 					dataindex += this -> infoHeader.width;
 				}
 				this -> pixels = _pixels;
-				delete [] Buffer;
 			} else throw Image::UnsupportedFormat();
 			// Close the file when finished
 			file.close();

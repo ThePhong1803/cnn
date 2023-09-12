@@ -29,7 +29,7 @@ Scalar dReLU(Scalar x)
 Scalar LeakyReLU(Scalar x)
 {
 	// LeakyReLU
-	return (x > 0) ?  x : alpha * x;
+	return (x >= 0) ?  x : alpha * x;
 }
 
 Scalar dLeakyReLU(Scalar x)
@@ -40,22 +40,35 @@ Scalar dLeakyReLU(Scalar x)
 
 Scalar tanhAct(Scalar x)
 {
+	// hyperbolic tangent
 	return std::tanh(x);
 }
 
 Scalar dtanhAct(Scalar x)
 {
+	// hyperbolic tangent derivative
 	return 1 - std::tanh(x) * std::tanh(x);
 }
 
 Scalar SiLU(Scalar x)
 {
 	// Sigmoid linear unit
-	return x * Sigmoid(x);
+	return x / (1 + exp(-x));
 }
 
 Scalar dSiLU(Scalar x)
 {
 	// Sigmoid linear unit derivative
 	return Sigmoid(x) * (1 + x * (1 - Sigmoid(x)));
+}
+
+Scalar SinP(Scalar x)
+{
+	// Sin polynomial
+	return std::sin(x) + SinP_coeff * x;
+}
+
+Scalar dSinP(Scalar x)
+{
+	return std::cos(x) + SinP_coeff;
 }

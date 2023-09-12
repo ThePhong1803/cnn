@@ -22,10 +22,10 @@
 
 /* Begin typedef section */
 
-typedef float Scalar;
-typedef Eigen::MatrixXf Matrix;
-typedef Eigen::RowVectorXf RowVector;
-typedef Eigen::VectorXf ColVector;
+typedef double Scalar;
+typedef Eigen::MatrixXd Matrix;
+typedef Eigen::RowVectorXd RowVector;
+typedef Eigen::VectorXd ColVector;
 typedef Scalar (*ScalarFunPtr)(Scalar);
 
 /* End typedef section */

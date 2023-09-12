@@ -63,9 +63,22 @@ Scalar LearningRateScheduler::getLearningRate()
 	return this -> lr;
 }
 
-void LearningRateScheduler::updateLearningRate(Scalar step)
+void LearningRateScheduler::setLearningRate(Scalar _new_lr)
+{
+	// return model current learning rate
+	this -> lr = _new_lr;
+}
+
+void LearningRateScheduler::updateLearningRate()
 {
 	// Do nothing - overrided method
+	throw DisableMethod("updateLearningRate");
+}
+
+void LearningRateScheduler::resetStep()
+{
+	// Do nothing - overrided method
+	throw DisableMethod("resetStep");
 }
 /* Base class method is not callable */
 void Optimizer::DenseOptimizer(DenseLayer * layer, int batch_size)

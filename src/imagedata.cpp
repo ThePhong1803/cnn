@@ -21,6 +21,7 @@ ImageData::ImageData(std::string path, bool invert, int _number, int _id)
 {
     Image img(path);
     img.setInvert(invert);
+	// img.getImageInfo();
     this -> number = _number;
     this -> id     = _id;
     this -> height = img.getHeight();
@@ -52,9 +53,15 @@ void ImageData::getPixelMatrix(Matrix * mat)
     {
         for(int32_t c = 0; c < mat -> cols(); c++)
         {
+            if(this -> pixels[r * mat -> cols() + c] > 1.0f || this -> pixels[r * mat -> cols() + c] < 0.0f) {
+                std::cout << "Error Element Found: " << this -> pixels[r * mat -> cols() + c] << std::endl;
+            }
             mat -> coeffRef(r, c) = this -> pixels[r * mat -> cols() + c];
         }
     }
-    // normalize data
+    // normalize data (dividing every element by the in matrix ole length)
     mat -> normalize();
+    // Scalar const std_dev = sqrt((mat -> array() - mat -> mean()).square().sum() / (mat -> size() - 1));
+    // Scalar const mean = mat -> mean();
+    // *mat = mat -> unaryExpr([&mean, &std_dev](Scalar x) -> Scalar { return (x - mean) / std_dev;});
 }

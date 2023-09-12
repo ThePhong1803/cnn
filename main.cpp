@@ -9,6 +9,17 @@
 Scalar linear(Scalar x) { return x; }
 Scalar dlinear(Scalar x) { return 1; }
 
+void logOutputAsAscii(Matrix * mat, std::ofstream& log) {
+	const std::string table = " .:-=+*#%@";
+	for(int i = 0; i < mat -> rows(); i++){
+		for(int j = 0; j < mat -> cols(); j++){
+			log << table[std::round(100 * mat ->coeff(i, j))];
+			log << table[std::round(100 * mat ->coeff(i, j))];
+		}
+		log << '\n';
+	}
+}
+
 void loadDataset(   std::vector<std::vector<Matrix *>> &input_data,             // input data
                     std::vector<std::vector<Matrix *>> &output_data,            // output data
                     std::vector<std::vector<Matrix>> &targetOutputs,          // target output for mapping
@@ -457,7 +468,6 @@ int main(int argc, char ** argv){
 	std::string cmd = "";
 	std::cout << "Command$ ";
 	getline(std::cin, cmd);
-	std::cout << std::endl;
 	while(cmd != "exit"){
 		if(cmd == "load") {
 			std::string buffer;
@@ -510,7 +520,7 @@ int main(int argc, char ** argv){
 				getline(std::cin, buffer);
 				int epoch = atoi(buffer.c_str());
 				std::ofstream log("./log/RMSE.txt");
-				log << "LOSS" << " " << "ACC" << '\n';
+				log << "train_loss" << " " << "train_acc" << " " << "valid_loss" << " " << "valid_acc" << '\n';
 				std::cout << std::fixed << std::setprecision(4);
 				for(int i = 0; i < epoch; i++){
 					/* Train and validate after each batch*/
@@ -560,18 +570,143 @@ int main(int argc, char ** argv){
 				optimizer = new SGD(learningRate, momentum, new ExponentDecayLearnRate(decay_rate));
 				cnn = new ConvolutionalNeuralNetwork(config, optimizer);
 				cnn ->summary();
-			} else if(cmd == "optconfig") {
+			} 
+			else std::cout << "Unknown command" << std::endl;
+		} else if(cmd == "optconfig") {
 				if(cnn != nullptr) {
+					std::string buffer;
 					std::cout << "Learn rate: ";
 					getline(std::cin, buffer);
 					learningRate = atof(buffer.c_str());
 
-					cnn -> optimizer -> getLearningRate() = learningRate;
+					cnn -> optimizer -> setLearningRate(learningRate);
+					std::cout << "New Learning rate: " << cnn -> optimizer -> getLearningRate() << std::endl;
 				}
 				else std::cout << "No configurable optimizer" << std::endl;
 			}
-			else std::cout << "Unknown command" << std::endl;
-		} else if (cmd == "clean"){
+		else if (cmd == "log") {
+			std::string flag;
+			bool log_img = true;
+			std::cout << "Log image (y/n): ";
+			std::getline(std::cin, flag);
+			if(flag == "y") log_img = true;
+			else if (flag == "n") log_img = false;
+			else std::cout << "Default log with image" << std::endl;
+			if(cnn != nullptr){
+				std::string buff;
+				std::cout << "Logging: ";
+				std::getline(std::cin, buff);
+				if(buff == "train") {
+					// record wrong case in training data
+					// first is to clean current training dataset in data buffer
+					cleanDataBuffer(input_data);
+					cleanLabelBuffer(output_data);
+
+					// loading new data without shuffle, the index of file is the actucaly file name.
+					// loading training data set and testing dataset
+					loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
+					
+					// prepare log file
+					std::ofstream log("./log/train_wrong.txt");
+					for(size_t i = 0; i < input_data.size(); i++) {
+						cnn -> propagateForward(input_data[i]);
+						int output_num = outputToLabelIdx(cnn -> layer.back() -> outputRef().back());
+						int expected_num = outputToLabelIdx(output_data[i].back());
+						if(output_num != expected_num) {
+							if(log_img) {
+								logOutputAsAscii(input_data[i].back(), log);
+							}
+							log << "File no: " << i + 1 << " Label: " << expected_num << " Predicted: " << output_num << std::endl;
+						}
+						std::cout << "\rLog progress: " << (i + 1) / input_data.size();
+					}
+					log.close();
+					cleanDataBuffer(input_data);
+					cleanLabelBuffer(output_data);
+					std::cout << "\rLog complete.        " << std::endl;
+				}
+				else if (buff == "test") {
+					// record wrong case in validation data
+					// first is to clean current testing dataset in data buffer
+					cleanDataBuffer(input_test);
+					cleanLabelBuffer(output_test);
+					
+					// loading new data without shuffle, the index of file is the actucaly file name.
+					// loading testing dataset
+					loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
+			
+					// prepare log file
+					std::ofstream log("./log/test_wrong.txt");
+					for(size_t i = 0; i < input_test.size(); i++) {
+						cnn -> propagateForward(input_test[i]);
+						int output_num = outputToLabelIdx(cnn -> layer.back() -> outputRef().back());
+						int expected_num = outputToLabelIdx(output_test[i].back());
+						if(output_num != expected_num) {
+							if(log_img){
+								logOutputAsAscii(input_test[i].back(), log);
+							}
+							log << "File no: " << i + 1 << " Label: " << expected_num << " Predicted: " << output_num << std::endl;
+						}
+						std::cout << "\rLog progress: " << (i + 1) / input_test.size();
+					}
+					log.close();
+					cleanDataBuffer(input_test);
+					cleanLabelBuffer(output_test);
+					std::cout << "\rLog complete.        " << std::endl;
+				}
+				else if (buff == "all") {
+					// clear current training data set and testing dataset
+					cleanDataBuffer(input_data);
+					cleanLabelBuffer(output_data);
+					cleanDataBuffer(input_test);
+					cleanLabelBuffer(output_test);
+					
+					// loading dataset
+					loadDataset(input_data, output_data, targetOutputs, labelVec, DATASIZE);
+					loadTestData(input_test, output_test, targetOutputs, validateLabels, TESTSIZE);
+					
+					// checking wrong in training dataset
+					std::ofstream log_train("./log/train_wrong.txt");
+					for(size_t i = 0; i < input_data.size(); i++) {
+						cnn -> propagateForward(input_data[i]);
+						int output_num = outputToLabelIdx(cnn -> layer.back() -> outputRef().back());
+						int expected_num = outputToLabelIdx(output_data[i].back());
+						if(output_num != expected_num) {
+							if(log_img){
+								logOutputAsAscii(input_data[i].back(), log_train);
+							}
+							log_train << "File no: " << i + 1 << " Label: " << expected_num << " Predicted: " << output_num << std::endl;
+						}
+						std::cout << "\rTrain log progress: " << (i + 1) / input_data.size();
+					}
+					log_train.close();
+					
+					// checking wrong in testing dataset
+					std::ofstream log_test("./log/test_wrong.txt");
+					for(size_t i = 0; i < input_test.size(); i++) {
+						cnn -> propagateForward(input_test[i]);
+						int output_num = outputToLabelIdx(cnn -> layer.back() -> outputRef().back());
+						int expected_num = outputToLabelIdx(output_test[i].back());
+						if(output_num != expected_num) {
+							if(log_img){
+								logOutputAsAscii(input_test[i].back(), log_test);
+							}
+							log_test << "File no: " << i + 1 << " Label: " << expected_num << " Predicted: " << output_num << std::endl;
+						}
+						std::cout << "\rTest log progress: " << (i + 1) / input_test.size();
+					}
+					log_test.close();
+					cleanDataBuffer(input_data);
+					cleanLabelBuffer(output_data);
+					cleanDataBuffer(input_test);
+					cleanLabelBuffer(output_test);
+					std::cout << "\rLogging train and test data complete" << std::endl;
+				}
+				else std::cout << "Unknown command" << std::endl;
+			}
+			else std::cout << "No model for logging" << std::endl;
+		}
+		else if (cmd == "clean"){
 			delete cnn;
 			delete optimizer;
 			cnn = nullptr;
@@ -580,13 +715,12 @@ int main(int argc, char ** argv){
 			cleanLabelBuffer(output_data);
 			cleanDataBuffer(input_test);
 			cleanLabelBuffer(output_test);
-		}else {
+		} else {
 			std::cout << "Unknown command " << cmd << std::endl;
 			cmd = "";
 		}
 		std::cout << "Command$ ";
 		getline(std::cin, cmd);
-		std::cout << std::endl;
 	}
 	cleanDataBuffer(input_data);
 	cleanLabelBuffer(output_data);

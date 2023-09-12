@@ -76,8 +76,8 @@ void ConvolutionalNeuralNetwork::propagateForward(std::vector<Matrix *> input)
 		// std::cout << "Output Layer " << i << std::endl;
 		// for(size_t j = 0; j < layer[i] -> outputRef().size(); j++)
 		// {
-			// std::cout << "Layer " << j << std::endl;
-			// std::cout << *layer[i] -> outputRef()[j] << std::endl;
+		// 	std::cout << "Layer " << j << std::endl;
+		// 	std::cout << *layer[i] -> outputRef()[j] << std::endl;
 		// }
 	}
 }
